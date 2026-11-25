@@ -7,6 +7,8 @@ import PackageDescription
 ///   rectangles, four-character codes, errors, Pascal strings and MacRoman,
 ///   Mac dates, fixed-point and extended numbers, big-endian reading and
 ///   writing, the Script Manager's answers and Gestalt's table.
+/// - `GraphiteTasks`: the Time Manager, Multiprocessing Services and
+///   atomic operations on a program's memory.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library and the C
@@ -24,6 +26,10 @@ let package = Package(
         .library(
             name: "GraphiteBase",
             targets: ["GraphiteBase"]
+        ),
+        .library(
+            name: "GraphiteTasks",
+            targets: ["GraphiteTasks"]
         )
     ],
     targets: [
@@ -31,12 +37,20 @@ let package = Package(
             name: "GraphiteBase"
         ),
         .target(
-            name: "Graphite",
+            name: "GraphiteTasks",
             dependencies: ["GraphiteBase"]
+        ),
+        .target(
+            name: "Graphite",
+            dependencies: ["GraphiteBase", "GraphiteTasks"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
             dependencies: ["GraphiteBase"]
+        ),
+        .testTarget(
+            name: "GraphiteTasksTests",
+            dependencies: ["GraphiteTasks"]
         )
     ]
 )

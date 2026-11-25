@@ -2,3 +2,4 @@
 // open windows and audio devices.
 
 @_exported import GraphiteBase
+@_exported import GraphiteTasks
