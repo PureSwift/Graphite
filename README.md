@@ -1,2 +1,70 @@
 # Graphite
-Swift Classic Toolbox API
+
+[![Swift](https://img.shields.io/badge/swift-6.4-orange.svg?style=flat)](https://swift.org)
+[![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macOS-lightgrey.svg)](https://swift.org)
+[![License](https://img.shields.io/badge/license-MIT-71787A.svg)](https://tldrlegal.com/license/mit-license)
+
+The Mac Toolbox of the Carbon era, in pure Swift: QuickDraw; the Resource,
+File, Window, Menu, Control and Dialog Managers; Carbon Events, Apple
+Events, fonts and the Sound Manager, as Swift types with their own API.
+
+Graphite has two kinds of clients:
+
+- [Perry](https://github.com/MillerTechnologyPeru/Perry), whose Carbon
+  provider exports Carbon's C ABI and calls Graphite.
+- Linux Swift programs, which import Graphite directly: a resource viewer,
+  a file manager that shows classic icons, a port of an old game.
+
+Graphite has no C ABI and no C headers, and doesn't use Foundation. Its
+names and types are Swift's (`Rect`, `PascalString`, `MacError`), not
+Carbon's spellings: Pascal strings in memory, handles, `OSErr` returns and
+Darwin's structure layouts are the job of the layer that exports Carbon.
+Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
+
+> **Status:** early development. `GraphiteBase` and `GraphiteTasks` are in
+> place; the File and Resource Managers, Apple Events, QuickDraw, text, the
+> Toolbox's windows, menus, controls and dialogs, and the Sound Manager come
+> next.
+
+## Modules
+
+| Module | |
+|---|---|
+| `GraphiteBase` | Points and rectangles, four-character codes, result codes, Pascal strings and MacRoman, Mac dates and clocks, `Fixed`, `Fract`, 80-bit extended and SANE decimal numbers, QuickDraw's `Random`, big-endian reading and writing, the Script Manager's answers and Gestalt's table. |
+| `GraphiteTasks` | The Time Manager, Multiprocessing Services (tasks, queues, events, semaphores, critical regions, aligned memory), `AbsoluteTime` and durations, and atomic operations on a program's memory. |
+| `Graphite` | Re-exports the modules above. |
+
+Everything depends only on the Swift standard library and the C library
+(Glibc, Musl or Darwin). Graphite builds for Linux on x86_64, arm64, i686
+and 32-bit PowerPC, and for macOS, where it can be compared with Apple's
+CarbonCore.
+
+## Usage
+
+```swift
+import Graphite
+
+let rect = Rect(top: 0, left: 0, bottom: 100, right: 200)
+let pinned = rect.pin(Point(v: 150, h: -5))           // (v: 99, h: 0)
+
+let name = PascalString("Café")!                       // MacRoman bytes
+let type: FourCharCode = "snd "
+
+let date = MacDate.now.parts                           // DateTimeRec
+
+let queue = MPQueue()
+let task = try MPTask.create(queue: queue, terminationWords: (1, 2)) { 0 }
+let ended = try queue.wait(timeout: .milliseconds(1000))
+```
+
+## Building
+
+```bash
+swift build
+swift test
+```
+
+## License
+
+MIT. Code ported from [Pomme](https://github.com/jorio/Pomme) keeps its MIT
+notice in each ported file.
