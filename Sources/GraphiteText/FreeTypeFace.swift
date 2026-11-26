@@ -90,6 +90,24 @@ public final class FreeTypeFace: FontFace, Sendable {
         face.withLock { $0.glyphIndex(for: character) != 0 }
     }
 
+    /// The glyph index FreeType gives a character, which is the glyph ID of
+    /// the font's own numbering.
+    public func glyphID(for character: Unicode.Scalar) -> UInt16 {
+        face.withLock { UInt16(truncatingIfNeeded: $0.glyphIndex(for: character)) }
+    }
+
+    /// A character's advance, bearing and size at a size, as the font gives
+    /// them: fractions of a pixel, hinted as the face's loader hints them.
+    public func glyphMetrics(for character: Unicode.Scalar, size: Int) -> GlyphMetrics? {
+        face.withLock { face in
+            guard (try? face.setPixelSize(width: 0, height: Self.pixelSize(size))) != nil else { return nil }
+            let index = face.glyphIndex(for: character)
+            guard index != 0, let glyph = try? face.glyph(at: index, flags: .default) else { return nil }
+            return GlyphMetrics(advance: glyph.advanceX, leftSideBearing: glyph.metrics.horizontalBearingX,
+                                top: glyph.metrics.horizontalBearingY, width: glyph.metrics.width, height: glyph.metrics.height)
+        }
+    }
+
     /// A table of an sfnt font by its tag; nil for a table it hasn't and for
     /// a font that isn't an sfnt (Type 1, say).
     public func table(_ tag: FourCharCode) -> [UInt8]? {
