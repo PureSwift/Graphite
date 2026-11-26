@@ -18,6 +18,8 @@ import PackageDescription
 ///   coercions, and the application's handlers.
 /// - `GraphiteQuickDraw`: QuickDraw's pixels, colors, regions, patterns and
 ///   transfer modes, ports, devices and offscreen worlds.
+/// - `GraphiteText`: fonts, the Font Manager's families, the built-in
+///   system font, and QuickDraw's text.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
@@ -56,6 +58,10 @@ let package = Package(
         .library(
             name: "GraphiteQuickDraw",
             targets: ["GraphiteQuickDraw"]
+        ),
+        .library(
+            name: "GraphiteText",
+            targets: ["GraphiteText"]
         )
     ],
     dependencies: [
@@ -95,8 +101,12 @@ let package = Package(
             dependencies: ["GraphiteBase"]
         ),
         .target(
+            name: "GraphiteText",
+            dependencies: ["GraphiteBase", "GraphiteQuickDraw"]
+        ),
+        .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -121,6 +131,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteQuickDrawTests",
             dependencies: ["GraphiteQuickDraw"]
+        ),
+        .testTarget(
+            name: "GraphiteTextTests",
+            dependencies: ["GraphiteText"]
         )
     ]
 )
