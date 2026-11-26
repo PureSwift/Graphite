@@ -27,6 +27,9 @@ import PackageDescription
 ///   update regions, and the content's buffer the host flushes.
 /// - `GraphiteMenus`: the Menu Manager: menus and their items, the menu
 ///   bar, and the 'MENU' resources that define them.
+/// - `GraphiteControls`: the Control Manager: controls of the five kinds,
+///   their values, parts and states, the window's list of them, and the
+///   'CNTL' resources that define them.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
@@ -83,6 +86,10 @@ let package = Package(
         .library(
             name: "GraphiteMenus",
             targets: ["GraphiteMenus"]
+        ),
+        .library(
+            name: "GraphiteControls",
+            targets: ["GraphiteControls"]
         )
     ],
     // FreeType reads outline fonts; builds without it keep the bitmap font.
@@ -147,8 +154,12 @@ let package = Package(
             dependencies: ["GraphiteBase"]
         ),
         .target(
+            name: "GraphiteControls",
+            dependencies: ["GraphiteBase"]
+        ),
+        .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows", "GraphiteMenus"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows", "GraphiteMenus", "GraphiteControls"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -189,6 +200,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteMenusTests",
             dependencies: ["GraphiteMenus"]
+        ),
+        .testTarget(
+            name: "GraphiteControlsTests",
+            dependencies: ["GraphiteControls"]
         )
     ]
 )

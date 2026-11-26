@@ -195,6 +195,11 @@ extension MacError: CustomStringConvertible {
             -210: "buffersTooSmall", -223: "siInvalidCompression",
             -5603: "menuPropertyInvalidErr", -5604: "menuPropertyNotFoundErr", -5620: "menuNotFoundErr",
             -5621: "menuUsesSystemDefErr", -5622: "menuItemNotFoundErr", -5623: "menuInvalidErr",
+            -30581: "errDataNotSupported", -30582: "errControlDoesntSupportFocus",
+            -30583: "errWindowDoesntSupportFocus", -30584: "errUnknownControl", -30585: "errCouldntSetFocus",
+            -30586: "errNoRootControl", -30587: "errRootAlreadyExists", -30588: "errInvalidPartCode",
+            -30589: "errControlsAlreadyExist", -30590: "errControlIsNotEmbedder",
+            -30592: "errControlHiddenOrDisabled", -30596: "errItemNotControl",
         ]
         guard let name = names[code] else { return "\(code)" }
         return "\(name) (\(code))"
@@ -244,4 +249,34 @@ public extension MacError {
     static var menuItemNotFound: MacError { MacError(-5622) }
     /// menuInvalidErr: the menu or its resource is invalid.
     static var menuInvalid: MacError { MacError(-5623) }
+}
+
+// MARK: - Control Manager
+
+public extension MacError {
+
+    /// errDataNotSupported: the control doesn't take the kind of data.
+    static var dataNotSupported: MacError { MacError(-30581) }
+    /// errControlDoesntSupportFocus.
+    static var controlDoesntSupportFocus: MacError { MacError(-30582) }
+    /// errWindowDoesntSupportFocus.
+    static var windowDoesntSupportFocus: MacError { MacError(-30583) }
+    /// errUnknownControl.
+    static var unknownControl: MacError { MacError(-30584) }
+    /// errCouldntSetFocus.
+    static var couldntSetFocus: MacError { MacError(-30585) }
+    /// errNoRootControl.
+    static var noRootControl: MacError { MacError(-30586) }
+    /// errRootAlreadyExists.
+    static var rootAlreadyExists: MacError { MacError(-30587) }
+    /// errInvalidPartCode.
+    static var invalidPartCode: MacError { MacError(-30588) }
+    /// errControlsAlreadyExist.
+    static var controlsAlreadyExist: MacError { MacError(-30589) }
+    /// errControlIsNotEmbedder.
+    static var controlIsNotEmbedder: MacError { MacError(-30590) }
+    /// errControlHiddenOrDisabled: it can't be focused or hit.
+    static var controlHiddenOrDisabled: MacError { MacError(-30592) }
+    /// errItemNotControl: a dialog item that isn't one.
+    static var itemNotControl: MacError { MacError(-30596) }
 }
