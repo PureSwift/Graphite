@@ -4,6 +4,7 @@
 // -1 to -127; -128 is skipped. Pictures' 16-bit pixels repeat two bytes at a
 // time.
 
+import protocol Foundation.ContiguousBytes
 import GraphiteBase
 
 public enum PackBits {
@@ -26,7 +27,7 @@ public enum PackBits {
     }
 
     /// Unpacks all of `data`.
-    public static func unpack(_ data: [UInt8], count: Int, unit: Int = 1) throws(MacError) -> [UInt8] {
+    public static func unpack(_ data: some ContiguousBytes, count: Int, unit: Int = 1) throws(MacError) -> [UInt8] {
         var reader = BigEndianReader(data)
         do {
             return try unpack(&reader, count: count, unit: unit)
@@ -37,7 +38,8 @@ public enum PackBits {
 
     /// Packs bytes as PackBits does: runs of three or more the same as a
     /// repeat, the rest as literals of at most 128.
-    public static func pack(_ bytes: [UInt8]) -> [UInt8] {
+    public static func pack(_ input: some ContiguousBytes) -> [UInt8] {
+        let bytes = Array(copying: input)
         var packed: [UInt8] = []
         var index = 0
         var literal: [UInt8] = []
