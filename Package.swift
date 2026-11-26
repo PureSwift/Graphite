@@ -20,6 +20,8 @@ import PackageDescription
 ///   transfer modes, ports, devices and offscreen worlds.
 /// - `GraphiteText`: fonts, the Font Manager's families, the built-in
 ///   system font, and QuickDraw's text.
+/// - `GraphiteSound`: sampled sounds from 'snd ' resources and AIFF files,
+///   and the codecs that decode them.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
@@ -64,6 +66,10 @@ let package = Package(
         .library(
             name: "GraphiteText",
             targets: ["GraphiteText"]
+        ),
+        .library(
+            name: "GraphiteSound",
+            targets: ["GraphiteSound"]
         )
     ],
     // FreeType reads outline fonts; builds without it keep the bitmap font.
@@ -116,8 +122,12 @@ let package = Package(
             ]
         ),
         .target(
+            name: "GraphiteSound",
+            dependencies: ["GraphiteBase"]
+        ),
+        .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -146,6 +156,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteTextTests",
             dependencies: ["GraphiteText"]
+        ),
+        .testTarget(
+            name: "GraphiteSoundTests",
+            dependencies: ["GraphiteSound"]
         )
     ]
 )
