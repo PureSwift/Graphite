@@ -25,6 +25,8 @@ import PackageDescription
 /// - `GraphiteWindows`: the Window Manager: windows of every class, the
 ///   window list, FindWindow, zooming and collapsing, the visible and
 ///   update regions, and the content's buffer the host flushes.
+/// - `GraphiteMenus`: the Menu Manager: menus and their items, the menu
+///   bar, and the 'MENU' resources that define them.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
