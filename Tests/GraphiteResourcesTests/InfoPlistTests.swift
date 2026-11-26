@@ -99,6 +99,16 @@ import GraphiteResources
         #expect(info.strings.count == 1)
     }
 
+    @Test func readsFromAnyBytes() throws {
+        let bytes = plist("<key>CFBundleIconFile</key><string>App</string>")
+        #expect(try InfoPlist(bytes: bytes)["CFBundleIconFile"] == "App")
+        #expect(try InfoPlist(bytes: Data(bytes))["CFBundleIconFile"] == "App")
+        #expect(try bytes.withUnsafeBytes { try InfoPlist(bytes: $0) }["CFBundleIconFile"] == "App")
+        // A slice keeps its parent's indices; the list is what it holds.
+        let padded = Data([1, 2, 3] + bytes)
+        #expect(try InfoPlist(bytes: padded[3...])["CFBundleIconFile"] == "App")
+    }
+
     @Test func bytesThatAreNotAListAreAParameterError() {
         #expect(throws: MacError.parameter) { try InfoPlist(bytes: []) }
         #expect(throws: MacError.parameter) { try InfoPlist(bytes: Array("not a plist".utf8)) }
