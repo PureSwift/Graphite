@@ -1,3 +1,4 @@
+import struct Foundation.Data
 import Testing
 import GraphiteBase
 
@@ -103,7 +104,28 @@ import GraphiteBase
         reader.align(to: 16)
         #expect(reader.offset == 8)
         let other = try reader.subreader(at: 1, count: 3)
-        #expect(other.bytes == [1, 2, 3])
+        #expect(Array(other.bytes) == [1, 2, 3])
+    }
+
+    @Test func slicesAreReadFromTheirOwnStart() throws {
+        let whole = Data([0xAA, 0xBB, 0, 1, 2, 3, 4, 5, 0xCC])
+        var reader = BigEndianReader(whole[2 ..< 8])
+        #expect(reader.count == 6)
+        #expect(try reader.peek(UInt16.self, at: 0) == 0x0001)
+        #expect(try reader.read(UInt32.self) == 0x0001_0203)
+        #expect(reader.remaining == 2)
+        #expect(Array(try reader.readBytes(2)) == [4, 5])
+        #expect(reader.isAtEnd)
+        #expect(throws: BigEndianReadError.self) { try reader.read(UInt8.self) }
+        // The bytes are all of the slice, from index 0.
+        #expect(reader.bytes.startIndex == 0)
+        #expect(Array(reader.bytes) == [0, 1, 2, 3, 4, 5])
+        // A reader of a part of a slice, and of a part of that.
+        var sub = try reader.subreader(at: 1, count: 4)
+        #expect(Array(sub.bytes) == [1, 2, 3, 4])
+        var inner = try sub.subreader(at: 1, count: 2)
+        #expect(try inner.read(UInt16.self) == 0x0203)
+        #expect(throws: BigEndianReadError.self) { try sub.subreader(at: 3, count: 2) }
     }
 
     @Test func randomBytesNeverTrap() {
