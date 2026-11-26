@@ -36,6 +36,9 @@ public final class FreeTypeFace: FontFace, Sendable {
     /// The styles the font itself is: its bold and italic bits.
     public let styles: TextStyle
 
+    /// How many faces the font file has: more than 1 for a collection (.ttc).
+    public let faceCount: Int
+
     /// A font in memory: `index` picks the face of a collection (a .ttc has
     /// several).
     public init(data bytes: some ContiguousBytes, index: Int = 0) throws {
@@ -49,6 +52,7 @@ public final class FreeTypeFace: FontFace, Sendable {
         }
         tables = try? SfntTables(font: font, index: index)
         (familyName, styleName, styles) = Self.names(of: face, tables: tables)
+        faceCount = max(1, face.faceCount)
         self.face = Mutex(face)
     }
 
@@ -64,6 +68,7 @@ public final class FreeTypeFace: FontFace, Sendable {
         tables = (try? Data(contentsOf: URL(fileURLWithPath: path), options: .alwaysMapped))
             .flatMap { try? SfntTables(font: $0, index: index) }
         (familyName, styleName, styles) = Self.names(of: face, tables: tables)
+        faceCount = max(1, face.faceCount)
         self.face = Mutex(face)
     }
 
