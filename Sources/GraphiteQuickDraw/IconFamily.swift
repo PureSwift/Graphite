@@ -3,6 +3,7 @@
 // X's icon families ('icns'), each made an ARGB image with its mask as
 // alpha. Indexed icons use the system's 4- and 8-bit tables.
 
+import protocol Foundation.ContiguousBytes
 import GraphiteBase
 
 /// An icon family's members by their types, and the best image of each
@@ -17,11 +18,11 @@ public struct IconFamily: Sendable {
     }
 
     /// An 'icns' file or resource: its members after its header.
-    public init(icns bytes: [UInt8]) throws(MacError) {
+    public init(icns bytes: some ContiguousBytes) throws(MacError) {
         var reader = BigEndianReader(bytes)
         do {
             guard try reader.read(UInt32.self) == FourCharCode("icns").rawValue else { throw MacError.parameter }
-            let length = min(Int(try reader.read(UInt32.self)), bytes.count)
+            let length = min(Int(try reader.read(UInt32.self)), reader.count)
             members = [:]
             while reader.offset + 8 <= length {
                 let type = FourCharCode(try reader.read(UInt32.self))
