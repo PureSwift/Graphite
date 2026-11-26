@@ -7,21 +7,31 @@ import Darwin
 #endif
 
 /// A folder of its own for a test, deleted with what's in it at the end.
+///
+/// The folder is inside another of its own, not directly in /tmp: finding an
+/// item that moved looks in the second folder up that is still there, and
+/// there, other tests running at once make files that can be given a deleted
+/// file's inode.
 final class TemporaryFolder {
 
     let path: String
+
+    /// The folder the test's is in, which goes with it.
+    private let root: String
 
     init() {
         var template = Array("/tmp/graphite-XXXXXX".utf8CString)
         let made = template.withUnsafeMutableBufferPointer { mkdtemp($0.baseAddress!) }
         // The real path: /tmp is a link on macOS.
         let resolved = realpath(made!, nil)!
-        path = String(cString: resolved)
+        root = String(cString: resolved)
         free(resolved)
+        path = root + "/folder"
+        mkdir(path, 0o755)
     }
 
     deinit {
-        remove(path)
+        remove(root)
     }
 
     private func remove(_ path: String) {

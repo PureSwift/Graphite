@@ -42,7 +42,10 @@ public final class FontFinder: Sendable {
         entries.withLock { cached in
             if let cached { return cached }
             var found: [Entry] = []
-            for folder in folders { Self.scan(folder, depth: 0, into: &found) }
+            // A folder may be inside another (Supplemental is in Fonts), so
+            // a file is read once, whichever folder reaches it first.
+            var seen = Set<String>()
+            for folder in folders { Self.scan(folder, depth: 0, into: &found, seen: &seen) }
             cached = found
             return found
         }
@@ -64,7 +67,7 @@ public final class FontFinder: Sendable {
 
     private static let extensions: Set<String> = ["ttf", "otf", "ttc", "otc", "pfb", "dfont"]
 
-    private static func scan(_ folder: String, depth: Int, into found: inout [Entry]) {
+    private static func scan(_ folder: String, depth: Int, into found: inout [Entry], seen: inout Set<String>) {
         guard depth < 4, let directory = opendir(folder) else { return }
         defer { closedir(directory) }
         var names: [(String, Bool)] = []
@@ -76,15 +79,15 @@ public final class FontFinder: Sendable {
         for (name, isDirectory) in names.sorted(by: { $0.0 < $1.0 }) {
             let path = folder + "/" + name
             if isDirectory {
-                scan(path, depth: depth + 1, into: &found)
+                scan(path, depth: depth + 1, into: &found, seen: &seen)
             } else if let dot = name.lastIndex(of: "."), extensions.contains(name[name.index(after: dot)...].lowercased()) {
+                guard seen.insert(path).inserted else { continue }
                 guard let first = try? FreeTypeFace(path: path) else { continue }
                 found.append(Entry(path: path, index: 0, family: first.familyName, style: first.styleName))
                 // A collection's other faces.
-                var index = 1
-                while index < 32, let next = try? FreeTypeFace(path: path, index: index) {
+                for index in 1 ..< first.faceCount {
+                    guard let next = try? FreeTypeFace(path: path, index: index) else { continue }
                     found.append(Entry(path: path, index: index, family: next.familyName, style: next.styleName))
-                    index += 1
                 }
             }
         }
