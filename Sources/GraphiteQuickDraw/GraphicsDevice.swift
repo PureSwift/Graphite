@@ -131,6 +131,9 @@ public final class QuickDraw {
     /// The random seed QuickDraw's Random advances.
     public var random = QuickDrawRandom()
 
+    /// The cursor, as InitCursor, SetCursor, HideCursor and ShowCursor leave it.
+    public var cursor = CursorState()
+
     public init(screens: [GraphicsDevice]) {
         self.screens = screens
         currentDevice = screens.first
