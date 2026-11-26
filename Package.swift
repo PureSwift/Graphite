@@ -12,6 +12,8 @@ import PackageDescription
 /// - `GraphiteFiles`: the File Manager over a POSIX file system: FSSpecs,
 ///   folder IDs, forks, resource forks and Finder info in AppleDouble
 ///   files, catalog information, aliases and special folders.
+/// - `GraphiteResources`: resource maps, resource files written back, the
+///   chain of open files, and the typed resources read so far.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
@@ -38,6 +40,10 @@ let package = Package(
         .library(
             name: "GraphiteFiles",
             targets: ["GraphiteFiles"]
+        ),
+        .library(
+            name: "GraphiteResources",
+            targets: ["GraphiteResources"]
         )
     ],
     dependencies: [
@@ -65,8 +71,12 @@ let package = Package(
             ]
         ),
         .target(
+            name: "GraphiteResources",
+            dependencies: ["GraphiteBase", "GraphiteFiles"]
+        ),
+        .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -79,6 +89,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteFilesTests",
             dependencies: ["GraphiteFiles"]
+        ),
+        .testTarget(
+            name: "GraphiteResourcesTests",
+            dependencies: ["GraphiteResources"]
         )
     ]
 )
