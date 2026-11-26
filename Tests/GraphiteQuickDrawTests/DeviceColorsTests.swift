@@ -65,4 +65,68 @@ import GraphiteQuickDraw
         #expect(device.pixels.colorTable.colors == ColorTable.standard(depth: 8)?.colors)
         #expect(device.pixels.colorTable.seed != seed)
     }
+
+    // MARK: Reserved and protected entries
+
+    @Test func matchingSkipsExcludedEntries() {
+        let table = ColorTable(colors: [.white, RGBColor(red: 0xFF00, green: 0xFF00, blue: 0xFF00), .black])
+        #expect(table.index(of: .white) == 0)
+        #expect(table.index(of: .white, excluding: [0]) == 1)
+        #expect(table.index(of: .white, excluding: [0, 1]) == 2)
+        #expect(table.index(of: .white, excluding: [0, 1, 2]) == 0)
+    }
+
+    @Test func reservedEntriesAreNotMatchedInDrawing() throws {
+        let device = indexedDevice()
+        #expect(device.pixels.value(for: .white) == 0)
+        try device.reserveEntry(0, true)
+        #expect(device.pixels.reservedEntries == [0])
+        let value = device.pixels.value(for: .white)
+        #expect(value != 0)
+        #expect(device.pixels.color(for: value).red8 >= 0xEE)
+        try device.reserveEntry(0, false)
+        #expect(device.pixels.value(for: .white) == 0)
+        // A reserved entry still holds its color, which SetEntries can change.
+        try device.reserveEntry(5, true)
+        try device.setEntries(from: 5, colors: [orange])
+        #expect(device.color(forIndex: 5) == orange)
+    }
+
+    @Test func protectedEntriesKeepTheirColors() throws {
+        let device = indexedDevice()
+        let before = device.color(forIndex: 10)
+        try device.protectEntry(10, true)
+        try device.setEntries(from: 9, colors: [orange, orange, orange])
+        #expect(device.color(forIndex: 9) == orange)
+        #expect(device.color(forIndex: 10) == before)
+        #expect(device.color(forIndex: 11) == orange)
+        try device.protectEntry(10, false)
+        try device.setEntries(from: 10, colors: [orange])
+        #expect(device.color(forIndex: 10) == orange)
+    }
+
+    @Test func badEntriesAreParameterErrors() {
+        let device = indexedDevice()
+        #expect(throws: MacError.parameter) { try device.reserveEntry(256, true) }
+        #expect(throws: MacError.parameter) { try device.reserveEntry(-1, true) }
+        #expect(throws: MacError.parameter) { try device.protectEntry(256, true) }
+        #expect(throws: MacError.parameter) { try device.protectEntry(-1, false) }
+    }
+
+    @Test func directDevicesIgnoreTheFlags() throws {
+        let device = GraphicsDevice.screen(width: 4, height: 4, depth: 32)
+        try device.reserveEntry(0, true)
+        try device.protectEntry(0, true)
+        try device.reserveEntry(9999, true)
+        #expect(device.pixels.reservedEntries.isEmpty && device.protectedEntries.isEmpty)
+    }
+
+    @Test func restoringClearsTheFlags() throws {
+        let device = indexedDevice()
+        try device.reserveEntry(3, true)
+        try device.protectEntry(4, true)
+        device.restoreColorTable()
+        #expect(device.pixels.reservedEntries.isEmpty)
+        #expect(device.protectedEntries.isEmpty)
+    }
 }
