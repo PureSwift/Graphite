@@ -41,7 +41,7 @@ import GraphiteAppleEvents
         #expect(throws: MacError.notAppleEvent) { try AppleEvent(.list()) }
         let other = AppleEvent(eventClass: "aevt", eventID: "quit", target: Descriptor(type: DescriptorType.kernelProcessID, integer: Int32(1)))
         #expect(!other.isForCurrentProcess)
-        #expect(AppleEvent(eventClass: "a", eventID: "b", returnID: 5).returnID == 5)
+        #expect(AppleEvent(eventClass: "test", eventID: "rtid", returnID: 5).returnID == 5)
     }
 
     @Test func printing() {
