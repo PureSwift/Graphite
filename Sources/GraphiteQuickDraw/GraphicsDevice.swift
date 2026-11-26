@@ -35,6 +35,10 @@ public final class GraphicsDevice {
     /// A screen's modes, the current first.
     public var displayModes: [DisplayMode]
 
+    /// The color table's entries that SetEntries leaves as they are
+    /// (ProtectEntry).
+    public internal(set) var protectedEntries: Set<Int> = []
+
     public init(bounds: Rect, pixels: PixelBuffer, isScreen: Bool, displayModes: [DisplayMode] = []) {
         self.bounds = bounds
         self.pixels = pixels
