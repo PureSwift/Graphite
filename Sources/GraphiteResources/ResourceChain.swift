@@ -4,6 +4,7 @@
 // number is its fork's, from the File Manager, as the Toolbox's were.
 
 import GraphiteBase
+import protocol Foundation.ContiguousBytes
 import GraphiteFiles
 
 public final class ResourceChain {
@@ -59,7 +60,7 @@ public final class ResourceChain {
 
     /// A file of resources from bytes, which can't be written back.
     @discardableResult
-    public func open(bytes: [UInt8]) throws(MacError) -> Int16 {
+    public func open(bytes: some ContiguousBytes) throws(MacError) -> Int16 {
         let file = try ResourceFile(bytes: bytes)
         let reference = nextBytesReference
         nextBytesReference -= 1
