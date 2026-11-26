@@ -14,7 +14,7 @@ import GraphiteFiles
         #expect(try alias.resolve() == (folder.path("Target"), false))
     }
 
-    /// As Perry's C and CoreServices' Swift wrote them: the path alone.
+    /// As earlier records of the format have it: the path alone.
     @Test func olderRecordsResolveByPath() throws {
         let folder = TemporaryFolder()
         folder.write("Target", [])
