@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import GraphiteBase
 import GraphiteResources
@@ -67,44 +68,51 @@ import GraphiteResources
 
     @Test func decodesEntities() throws {
         let info = try InfoPlist(bytes: plist("""
-            <key>A</key><string>Tom &amp; Jerry &lt;3 &#65;&#x42; &quot;q&quot; &bogus; &</string>
+            <key>A</key><string>Tom &amp; Jerry &lt;3 &#65;&#x42; &quot;q&quot;</string>
             """))
-        #expect(info["A"] == "Tom & Jerry <3 AB \"q\" &bogus; &")
+        #expect(info["A"] == "Tom & Jerry <3 AB \"q\"")
     }
 
-    @Test func emptyStringsAndCommentsAndCDATA() throws {
+    @Test func emptyStringsAndComments() throws {
         let info = try InfoPlist(bytes: plist("""
             <!-- a comment with <string>fake</string> -->
             <key>E</key><string/>
             <key>F</key><string></string>
-            <key>C</key><string><![CDATA[a<b]]></string>
             """))
         #expect(info["E"] == "")
         #expect(info["F"] == "")
-        #expect(info["C"] == "a<b")
     }
 
-    @Test func tagsWithAttributesAndNonASCII() throws {
-        let info = try InfoPlist(bytes: plist("""
-            <key>N</key><string xml:space="preserve">Café</string>
-            """))
+    @Test func nonASCIIText() throws {
+        let info = try InfoPlist(bytes: plist("<key>N</key><string>Café</string>"))
         #expect(info["N"] == "Café")
     }
 
-    @Test func binaryListsAreAParameterError() {
+    @Test func readsBinaryLists() throws {
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIconFile": "App", "Count": 3, "Nested": ["CFBundleIconFile": "Wrong"]] as [String: Any],
+            format: .binary, options: 0)
+        #expect(data.starts(with: Array("bplist".utf8)))
+        let info = try InfoPlist(bytes: Array(data))
+        #expect(info["CFBundleIconFile"] == "App")
+        #expect(info["Count"] == nil)
+        #expect(info.strings.count == 1)
+    }
+
+    @Test func bytesThatAreNotAListAreAParameterError() {
+        #expect(throws: MacError.parameter) { try InfoPlist(bytes: []) }
+        #expect(throws: MacError.parameter) { try InfoPlist(bytes: Array("not a plist".utf8)) }
         #expect(throws: MacError.parameter) { try InfoPlist(bytes: Array("bplist00".utf8) + [0, 1, 2]) }
     }
 
-    @Test func noDictionaryReadsAsEmpty() throws {
-        #expect(try InfoPlist(bytes: []).strings.isEmpty)
-        #expect(try InfoPlist(bytes: Array("not a plist".utf8)).strings.isEmpty)
+    @Test func aListThatIsNotADictionaryReadsAsEmpty() throws {
         #expect(try InfoPlist(bytes: Array("<plist><array><string>x</string></array></plist>".utf8)).strings.isEmpty)
     }
 
-    @Test func truncatedInputDoesNotTrap() throws {
+    @Test func truncatedInputDoesNotTrap() {
         let whole = plist("<key>A</key><string>b</string>")
         for length in 0 ... whole.count {
-            _ = try InfoPlist(bytes: Array(whole.prefix(length)))
+            _ = try? InfoPlist(bytes: Array(whole.prefix(length)))
         }
     }
 }
