@@ -136,6 +136,37 @@ public extension MacError {
     static var resourceAttribute: MacError { MacError(-198) }
     /// mapReadErr: the resource map is damaged.
     static var mapRead: MacError { MacError(-199) }
+
+    // Apple Event Manager
+
+    /// procNotFound: no process of the address is running.
+    static var processNotFound: MacError { MacError(-600) }
+    /// errAECoercionFail: the data can't be coerced to the type.
+    static var coercionFailed: MacError { MacError(-1700) }
+    /// errAEDescNotFound: no descriptor of the keyword.
+    static var descriptorNotFound: MacError { MacError(-1701) }
+    /// errAECorruptData.
+    static var corruptData: MacError { MacError(-1702) }
+    /// errAEWrongDataType.
+    static var wrongDataType: MacError { MacError(-1703) }
+    /// errAENotAEDesc: not a descriptor.
+    static var notDescriptor: MacError { MacError(-1704) }
+    /// errAEBadListItem: not a list's item.
+    static var badListItem: MacError { MacError(-1705) }
+    /// errAENotAppleEvent.
+    static var notAppleEvent: MacError { MacError(-1707) }
+    /// errAEEventNotHandled: no handler took the event.
+    static var eventNotHandled: MacError { MacError(-1708) }
+    /// errAEReplyNotValid.
+    static var replyNotValid: MacError { MacError(-1709) }
+    /// errAEUnknownSendMode.
+    static var unknownSendMode: MacError { MacError(-1710) }
+    /// errAETimeout.
+    static var appleEventTimeout: MacError { MacError(-1712) }
+    /// errAEHandlerNotFound: no handler of the class and ID is installed.
+    static var handlerNotFound: MacError { MacError(-1717) }
+    /// errAEIllegalIndex: an index past a list's items.
+    static var illegalIndex: MacError { MacError(-1719) }
 }
 
 extension MacError: CustomStringConvertible {
@@ -153,7 +184,12 @@ extension MacError: CustomStringConvertible {
             -47: "fBsyErr", -48: "dupFNErr", -49: "opWrErr", -51: "rfNumErr", -54: "permErr", -61: "wrPermErr",
             -120: "dirNFErr", -1302: "afpItemNotFound", -1417: "errFSNoMoreItems", -1421: "errFSForkExists",
             -1424: "errFSForkNotFound", -192: "resNotFound", -193: "resFNotFound", -194: "addResFailed",
-            -196: "rmvResFailed", -198: "resAttrErr", -199: "mapReadErr",
+            -196: "rmvResFailed", -198: "resAttrErr", -199: "mapReadErr", -600: "procNotFound",
+            -1700: "errAECoercionFail", -1701: "errAEDescNotFound", -1702: "errAECorruptData",
+            -1703: "errAEWrongDataType", -1704: "errAENotAEDesc", -1705: "errAEBadListItem",
+            -1707: "errAENotAppleEvent", -1708: "errAEEventNotHandled", -1709: "errAEReplyNotValid",
+            -1710: "errAEUnknownSendMode", -1712: "errAETimeout", -1717: "errAEHandlerNotFound",
+            -1719: "errAEIllegalIndex",
         ]
         guard let name = names[code] else { return "\(code)" }
         return "\(name) (\(code))"

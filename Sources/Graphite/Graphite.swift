@@ -5,3 +5,4 @@
 @_exported import GraphiteTasks
 @_exported import GraphiteFiles
 @_exported import GraphiteResources
+@_exported import GraphiteAppleEvents
