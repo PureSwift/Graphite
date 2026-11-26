@@ -94,16 +94,20 @@ let package = Package(
         .library(
             name: "GraphiteDialogs",
             targets: ["GraphiteDialogs"]
-        )
+        ),
+        .library(name: "GraphiteEvents", targets: ["GraphiteEvents"]),
+        .library(name: "GraphiteSDLEvents", targets: ["GraphiteSDLEvents"])
     ],
     // FreeType reads outline fonts; builds without it keep the bitmap font.
     traits: [
         .trait(name: "FreeType", description: "Outline fonts through FreeType"),
+        .trait(name: "SDL3", description: "SDL3 event host"),
         .default(enabledTraits: ["FreeType"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0"),
         .package(url: "https://github.com/PureSwift/swift-freetype.git", from: "0.1.1"),
+        .package(url: "https://github.com/PureSwift/SDL.git", exact: "3.3.0"),
     ],
     targets: [
         .target(
@@ -165,9 +169,13 @@ let package = Package(
             name: "GraphiteDialogs",
             dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteControls", "GraphiteResources"]
         ),
+        .target(name: "GraphiteEvents", dependencies: ["GraphiteBase"]),
+        .target(name: "GraphiteSDLEvents", dependencies: ["GraphiteEvents", "GraphiteBase",
+            .product(name: "SDL3Swift", package: "SDL", condition: .when(traits: ["SDL3"]))],
+            swiftSettings: [.define("GRAPHITE_SDL3", .when(traits: ["SDL3"]))]),
         .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows", "GraphiteMenus", "GraphiteControls", "GraphiteDialogs"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows", "GraphiteMenus", "GraphiteControls", "GraphiteDialogs", "GraphiteEvents"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -216,6 +224,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteDialogsTests",
             dependencies: ["GraphiteDialogs"]
-        )
+        ),
+        .testTarget(name: "GraphiteEventsTests", dependencies: ["GraphiteEvents"]),
+        .testTarget(name: "GraphiteSDLEventsTests", dependencies: ["GraphiteSDLEvents", "GraphiteEvents", "GraphiteBase",
+            .product(name: "SDL3Swift", package: "SDL", condition: .when(traits: ["SDL3"]))],
+            swiftSettings: [.define("GRAPHITE_SDL3", .when(traits: ["SDL3"]))])
     ]
 )
