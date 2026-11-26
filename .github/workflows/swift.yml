@@ -19,12 +19,16 @@ jobs:
       - uses: SwiftyLab/setup-swift@latest
         with:
           swift-version: "6.4.2"
+      - name: Install FreeType
+        run: brew install freetype pkg-config
       - name: Swift version
         run: swift --version
       - name: Build
         run: swift build
       - name: Test
         run: swift test
+      - name: Build and test without FreeType
+        run: swift test --disable-default-traits --scratch-path .build-notrait
 
   linux:
     name: Linux (${{ matrix.arch }})
@@ -44,10 +48,12 @@ jobs:
         # The date tests read time zones from the system's database.
         run: |
           apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata libfreetype-dev fonts-dejavu-core pkg-config
       - name: Swift version
         run: swift --version
       - name: Build
         run: swift build
       - name: Test
         run: swift test
+      - name: Build and test without FreeType
+        run: swift test --disable-default-traits --scratch-path .build-notrait
