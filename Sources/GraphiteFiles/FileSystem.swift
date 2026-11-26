@@ -1,7 +1,7 @@
-// The File Manager's catalog over a POSIX file system, as Perry's files.c
-// modelled it: one volume, "Macintosh HD" (-100), at the root; folder IDs
-// are inodes, with the root as 2; names in FSSpecs are MacRoman. A Mac's
-// file system tells no case apart, so a name not there as spelled is looked
+// The File Manager's catalog over a POSIX file system: one volume,
+// "Macintosh HD" (-100), at the root; folder IDs are inodes, with the root
+// as 2; names in FSSpecs are MacRoman. A Mac's file system tells no case
+// apart, so a name not there as spelled is looked
 // for in any case. A file's resource fork and Finder info are kept in an
 // AppleDouble file beside it ("._name"), which moves, is renamed and is
 // deleted with it and isn't listed in its folder.
