@@ -42,6 +42,13 @@ public final class TimeManagerTask: @unchecked Sendable {
         }
     }
 
+    /// When an extended task was last due (tmWakeUp), which each prime
+    /// from its action counts from; nil for a plain task, or before it is
+    /// first primed.
+    public var wakeUpTime: AbsoluteTime? {
+        TimeManagerScheduler.shared.withLock { wakeUp.map { AbsoluteTime(nanoseconds: $0) } }
+    }
+
     public var isInstalled: Bool {
         TimeManagerScheduler.shared.withLock { isInstalledValue }
     }
