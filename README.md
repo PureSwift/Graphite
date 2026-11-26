@@ -18,10 +18,11 @@ Graphite has three kinds of clients:
 - Linux Swift programs, which import Graphite directly: a resource viewer,
   a file manager that shows classic icons, a port of an old game.
 
-Graphite has no C ABI and no C headers, and doesn't use Foundation. Its
-names and types are Swift's (`Rect`, `PascalString`, `MacError`), not
-Carbon's spellings: Pascal strings in memory, handles, `OSErr` returns and
-Darwin's structure layouts are the job of the layer that exports Carbon.
+Graphite has no C ABI and no C headers. It uses Foundation for bytes (`Data`,
+`ContiguousBytes`) and property lists only. Its names and types are Swift's
+(`Rect`, `PascalString`, `MacError`), not Carbon's spellings: Pascal strings in
+memory, handles, `OSErr` returns and Darwin's structure layouts are the job of
+the layer that exports Carbon.
 Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 
 > **Status:** early development. `GraphiteBase`, `GraphiteTasks`,
