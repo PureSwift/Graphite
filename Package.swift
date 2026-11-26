@@ -25,6 +25,8 @@ import PackageDescription
 /// - `GraphiteWindows`: the Window Manager: windows of every class, the
 ///   window list, FindWindow, zooming and collapsing, the visible and
 ///   update regions, and the content's buffer the host flushes.
+/// - `GraphiteMenus`: the Menu Manager: menus and their items, the menu
+///   bar, and the 'MENU' resources that define them.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
@@ -77,6 +79,10 @@ let package = Package(
         .library(
             name: "GraphiteWindows",
             targets: ["GraphiteWindows"]
+        ),
+        .library(
+            name: "GraphiteMenus",
+            targets: ["GraphiteMenus"]
         )
     ],
     // FreeType reads outline fonts; builds without it keep the bitmap font.
@@ -137,8 +143,12 @@ let package = Package(
             dependencies: ["GraphiteBase", "GraphiteQuickDraw"]
         ),
         .target(
+            name: "GraphiteMenus",
+            dependencies: ["GraphiteBase"]
+        ),
+        .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows", "GraphiteMenus"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -175,6 +185,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteWindowsTests",
             dependencies: ["GraphiteWindows", "GraphiteQuickDraw"]
+        ),
+        .testTarget(
+            name: "GraphiteMenusTests",
+            dependencies: ["GraphiteMenus"]
         )
     ]
 )
