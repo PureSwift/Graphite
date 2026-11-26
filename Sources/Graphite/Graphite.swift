@@ -3,3 +3,4 @@
 
 @_exported import GraphiteBase
 @_exported import GraphiteTasks
+@_exported import GraphiteFiles
