@@ -18,6 +18,17 @@ import GraphiteBase
         #expect(MacError.mpDeleted.code == -29295)
     }
 
+    @Test func soundManagerCodes() {
+        #expect(MacError.queueFull.code == -203)
+        #expect(MacError.badChannel.code == -205)
+        #expect(MacError.badFormat.code == -206)
+        #expect(MacError.badFileFormat.code == -208)
+        #expect(MacError.channelBusy.code == -209)
+        #expect(MacError.invalidCompression.code == -223)
+        #expect(MacError.badFormat.description == "badFormat (-206)")
+        #expect(MacError.badFileFormat.description == "badFileFormat (-208)")
+    }
+
     @Test func descriptionNamesKnownCodes() {
         #expect(MacError.parameter.description == "paramErr (-50)")
         #expect(MacError(-12345).description == "-12345")
