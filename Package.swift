@@ -16,6 +16,8 @@ import PackageDescription
 ///   chain of open files, and the typed resources read so far.
 /// - `GraphiteAppleEvents`: descriptors, lists, records and Apple events,
 ///   coercions, and the application's handlers.
+/// - `GraphiteQuickDraw`: QuickDraw's pixels, colors, regions, patterns and
+///   transfer modes, ports, devices and offscreen worlds.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
@@ -50,6 +52,10 @@ let package = Package(
         .library(
             name: "GraphiteAppleEvents",
             targets: ["GraphiteAppleEvents"]
+        ),
+        .library(
+            name: "GraphiteQuickDraw",
+            targets: ["GraphiteQuickDraw"]
         )
     ],
     dependencies: [
@@ -85,8 +91,12 @@ let package = Package(
             dependencies: ["GraphiteBase", "GraphiteFiles"]
         ),
         .target(
+            name: "GraphiteQuickDraw",
+            dependencies: ["GraphiteBase"]
+        ),
+        .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -107,6 +117,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteAppleEventsTests",
             dependencies: ["GraphiteAppleEvents"]
+        ),
+        .testTarget(
+            name: "GraphiteQuickDrawTests",
+            dependencies: ["GraphiteQuickDraw"]
         )
     ]
 )
