@@ -9,6 +9,7 @@
 // Files/HostVolume.cpp (ADFJumpToResourceFork):
 // Copyright (c) 2020 Iliyas Jorio. MIT License.
 
+import protocol Foundation.ContiguousBytes
 import GraphiteBase
 
 /// An AppleDouble or AppleSingle file's entries.
@@ -52,13 +53,13 @@ public struct AppleDouble: Hashable, Sendable {
     }
 
     /// Whether bytes start as an AppleDouble or AppleSingle file does.
-    public static func isAppleDouble(_ bytes: [UInt8]) -> Bool {
+    public static func isAppleDouble(_ bytes: some ContiguousBytes) -> Bool {
         guard let magic = try? BigEndianReader(bytes).peek(UInt32.self, at: 0) else { return false }
         return magic == appleDoubleMagic || magic == appleSingleMagic
     }
 
     /// Throws for bytes that aren't one, or an entry past their end.
-    public init(bytes: [UInt8]) throws(MacError) {
+    public init(bytes: some ContiguousBytes) throws(MacError) {
         do {
             var reader = BigEndianReader(bytes)
             let magic = try reader.read(UInt32.self)
