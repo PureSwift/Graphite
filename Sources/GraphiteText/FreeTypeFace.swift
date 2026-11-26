@@ -4,6 +4,7 @@
 
 #if FreeType
 import CFreeType
+import protocol Foundation.ContiguousBytes
 import Synchronization
 import GraphiteBase
 
@@ -37,12 +38,15 @@ public final class FreeTypeFace: FontFace, @unchecked Sendable {
 
     /// A font in memory: nil `index` is the file's first face (a .ttc has
     /// several).
-    public init(data bytes: [UInt8], index: Int = 0) throws {
+    public init(data bytes: some ContiguousBytes, index: Int = 0) throws {
         guard let library = Self.library else { throw LoadError.libraryUnavailable }
-        let copy = UnsafeMutableRawBufferPointer.allocate(byteCount: max(1, bytes.count), alignment: 16)
-        bytes.withUnsafeBytes { if !bytes.isEmpty { copy.baseAddress!.copyMemory(from: $0.baseAddress!, byteCount: bytes.count) } }
+        // FreeType reads from the bytes for as long as the face lives, so
+        // they are copied.
+        let count = bytes.withUnsafeBytes { $0.count }
+        let copy = UnsafeMutableRawBufferPointer.allocate(byteCount: max(1, count), alignment: 16)
+        bytes.withUnsafeBytes { if $0.count > 0 { copy.baseAddress!.copyMemory(from: $0.baseAddress!, byteCount: $0.count) } }
         var face: FT_Face?
-        guard FT_New_Memory_Face(library, copy.baseAddress!.assumingMemoryBound(to: FT_Byte.self), FT_Long(bytes.count), FT_Long(index), &face) == 0,
+        guard FT_New_Memory_Face(library, copy.baseAddress!.assumingMemoryBound(to: FT_Byte.self), FT_Long(count), FT_Long(index), &face) == 0,
               let face else {
             copy.deallocate()
             throw LoadError.unreadable
