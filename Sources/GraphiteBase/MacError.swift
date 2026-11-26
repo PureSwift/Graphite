@@ -1,6 +1,6 @@
-// The Toolbox's result codes, as an error Graphite throws. Perry turns it
-// back into the OSErr or OSStatus its caller expects, and into ResError,
-// MemError and QDError.
+// The Toolbox's result codes, as an error Graphite throws. The layer that
+// exports Carbon turns it back into the OSErr or OSStatus its caller
+// expects, and into ResError, MemError and QDError.
 
 /// A Mac OS result code. Zero, noErr, is success; Graphite throws only the
 /// others.
@@ -72,6 +72,55 @@ public extension MacError {
     static var mpTimeout: MacError { MacError(-29296) }
     /// kMPDeletedErr: what was waited on was deleted.
     static var mpDeleted: MacError { MacError(-29295) }
+
+    // File Manager
+
+    /// dirFulErr: the folder is full.
+    static var directoryFull: MacError { MacError(-33) }
+    /// dskFulErr: the disk is full.
+    static var diskFull: MacError { MacError(-34) }
+    /// nsvErr: no such volume.
+    static var noSuchVolume: MacError { MacError(-35) }
+    /// ioErr: an I/O error.
+    static var io: MacError { MacError(-36) }
+    /// bdNamErr: a name that isn't allowed.
+    static var badName: MacError { MacError(-37) }
+    /// fnOpnErr: the file isn't open.
+    static var fileNotOpen: MacError { MacError(-38) }
+    /// eofErr: the end of the file came first.
+    static var endOfFile: MacError { MacError(-39) }
+    /// posErr: a position before the start of the file.
+    static var position: MacError { MacError(-40) }
+    /// tmfoErr: too many files open.
+    static var tooManyFilesOpen: MacError { MacError(-42) }
+    /// fnfErr: the file isn't there.
+    static var fileNotFound: MacError { MacError(-43) }
+    /// wPrErr: the volume is locked.
+    static var writeProtected: MacError { MacError(-44) }
+    /// fLckdErr: the file is locked.
+    static var fileLocked: MacError { MacError(-45) }
+    /// fBsyErr: the file is busy, or the folder isn't empty.
+    static var fileBusy: MacError { MacError(-47) }
+    /// dupFNErr: an item of the name is already there.
+    static var duplicateFileName: MacError { MacError(-48) }
+    /// opWrErr: the file is already open for writing.
+    static var openForWriting: MacError { MacError(-49) }
+    /// rfNumErr: a reference number that names no open file.
+    static var referenceNumber: MacError { MacError(-51) }
+    /// permErr: permission denied.
+    static var permission: MacError { MacError(-54) }
+    /// wrPermErr: the file wasn't opened for writing.
+    static var writePermission: MacError { MacError(-61) }
+    /// dirNFErr: the folder isn't there.
+    static var directoryNotFound: MacError { MacError(-120) }
+    /// afpItemNotFound: nothing in the desktop database.
+    static var itemNotFound: MacError { MacError(-1302) }
+    /// errFSNoMoreItems: an iteration is done.
+    static var noMoreItems: MacError { MacError(-1417) }
+    /// errFSForkExists: the fork is already there.
+    static var forkExists: MacError { MacError(-1421) }
+    /// errFSForkNotFound: the fork isn't there.
+    static var forkNotFound: MacError { MacError(-1424) }
 }
 
 extension MacError: CustomStringConvertible {
@@ -84,6 +133,11 @@ extension MacError: CustomStringConvertible {
             -128: "userCanceledErr", -5551: "gestaltUndefSelectorErr", -5552: "gestaltDupSelectorErr",
             -5553: "gestaltLocationErr", -29299: "kMPInvalidIDErr", -29298: "kMPInsufficientResourcesErr",
             -29297: "kMPTaskAbortedErr", -29296: "kMPTimeoutErr", -29295: "kMPDeletedErr",
+            -33: "dirFulErr", -34: "dskFulErr", -35: "nsvErr", -36: "ioErr", -37: "bdNamErr", -38: "fnOpnErr",
+            -39: "eofErr", -40: "posErr", -42: "tmfoErr", -43: "fnfErr", -44: "wPrErr", -45: "fLckdErr",
+            -47: "fBsyErr", -48: "dupFNErr", -49: "opWrErr", -51: "rfNumErr", -54: "permErr", -61: "wrPermErr",
+            -120: "dirNFErr", -1302: "afpItemNotFound", -1417: "errFSNoMoreItems", -1421: "errFSForkExists",
+            -1424: "errFSForkNotFound",
         ]
         guard let name = names[code] else { return "\(code)" }
         return "\(name) (\(code))"
