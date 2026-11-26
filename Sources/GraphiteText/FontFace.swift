@@ -96,10 +96,29 @@ public protocol FontFace: AnyObject, Sendable {
     /// The font's metrics in ems, as ATSFontGetHorizontalMetrics gives them;
     /// nil for a face that isn't an outline font.
     var horizontalMetrics: HorizontalFontMetrics? { get }
+
+    /// A character's glyph ID, as ATSUI's layout records name glyphs; 0 for
+    /// a character the face hasn't.
+    func glyphID(for character: Unicode.Scalar) -> UInt16
+
+    /// A character's metrics at a size, with fractions of a pixel where the
+    /// face has them; nil for a character it hasn't.
+    func glyphMetrics(for character: Unicode.Scalar, size: Int) -> GlyphMetrics?
 }
 
 public extension FontFace {
     func hasStyle(_ style: TextStyle) -> Bool { style.isEmpty }
     func table(_ tag: FourCharCode) -> [UInt8]? { nil }
     var horizontalMetrics: HorizontalFontMetrics? { nil }
+
+    /// A face with no glyph numbers of its own names its glyphs by their
+    /// characters.
+    func glyphID(for character: Unicode.Scalar) -> UInt16 {
+        glyph(for: character, size: 12) == nil ? 0 : UInt16(min(character.value, 0xFFFE))
+    }
+
+    /// The glyph's image, whole pixels, as its metrics.
+    func glyphMetrics(for character: Unicode.Scalar, size: Int) -> GlyphMetrics? {
+        glyph(for: character, size: size).map(GlyphMetrics.init(image:))
+    }
 }
