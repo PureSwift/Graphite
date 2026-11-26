@@ -81,10 +81,17 @@ public struct ColorTable: Hashable, Sendable {
 
     /// Color2Index: the value whose color is nearest, an exact one first.
     public func index(of color: RGBColor) -> Int {
-        if let exact = colors.firstIndex(of: color) { return exact }
+        index(of: color, excluding: [])
+    }
+
+    /// Color2Index on a device with reserved entries, which no color is
+    /// matched to: the nearest of the others, an exact one first; 0 if all
+    /// are reserved.
+    public func index(of color: RGBColor, excluding reserved: Set<Int>) -> Int {
+        if let exact = colors.indices.first(where: { colors[$0] == color && !reserved.contains($0) }) { return exact }
         var best = 0
         var bestDistance = Int.max
-        for (index, candidate) in colors.enumerated() {
+        for (index, candidate) in colors.enumerated() where !reserved.contains(index) {
             let distance = candidate.distance(to: color)
             if distance < bestDistance {
                 best = index
