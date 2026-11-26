@@ -2,6 +2,8 @@
 // asked for, changed, added and removed in memory, and written back to the
 // fork when it is updated or closed, as UpdateResFile and CloseResFile do.
 
+import protocol Foundation.ContiguousBytes
+import struct Foundation.Data
 import GraphiteBase
 import GraphiteFiles
 
@@ -11,8 +13,9 @@ public final class ResourceFile {
     /// made from bytes alone.
     public let fork: Fork?
 
-    /// The bytes the map was read from.
-    private var source: [UInt8]
+    /// The bytes the map was read from, from index 0: a file mapped into
+    /// memory stays mapped, and resources are copied out as they are asked for.
+    private var source: Data
 
     private var map: ResourceMap
 
@@ -33,9 +36,10 @@ public final class ResourceFile {
     }
 
     /// The resources of a fork's bytes: mapReadErr for a damaged map.
-    public init(bytes: [UInt8]) throws(MacError) {
-        source = bytes
-        map = try ResourceMap(parsing: bytes)
+    public init(bytes: some ContiguousBytes) throws(MacError) {
+        let data = Data(zeroBased: bytes)
+        source = data
+        map = try ResourceMap(parsing: data)
         fork = nil
     }
 
@@ -45,10 +49,10 @@ public final class ResourceFile {
         let size = fork.size
         guard size > 0 else { throw .endOfFile }
         guard size <= Int64(Int32.max) else { throw .mapRead }
-        let bytes = try fork.readAll(count: Int(size))
-        guard bytes.count == Int(size) else { throw .endOfFile }
-        source = bytes
-        map = try ResourceMap(parsing: bytes)
+        let data = try fork.contents()
+        guard data.count == Int(size) else { throw .endOfFile }
+        source = data
+        map = try ResourceMap(parsing: data)
         self.fork = fork
         if !fork.canWrite { map.attributes.insert(.readOnly) }
     }
@@ -195,24 +199,13 @@ public final class ResourceFile {
         let bytes = try write()
         try fork.replaceContents(with: bytes)
         // The file as it now is on disk.
-        source = bytes
+        source = Data(bytes)
         map = try ResourceMap(parsing: bytes)
         changedBytes = [:]
     }
 }
 
 extension Fork {
-
-    /// Up to `count` bytes from the fork's start.
-    func readAll(count: Int) throws(MacError) -> [UInt8] {
-        var bytes = [UInt8](repeating: 0, count: count)
-        var result = Result<Int, MacError>.success(0)
-        bytes.withUnsafeMutableBytes { buffer in
-            result = Result { () throws(MacError) -> Int in try read(into: buffer, from: .start(0)) }
-        }
-        bytes.removeLast(count - (try result.get()))
-        return bytes
-    }
 
     /// The fork's bytes are these, written out.
     func replaceContents(with bytes: [UInt8]) throws(MacError) {
