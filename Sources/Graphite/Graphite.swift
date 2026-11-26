@@ -11,3 +11,4 @@
 @_exported import GraphiteSound
 @_exported import GraphiteWindows
 @_exported import GraphiteMenus
+@_exported import GraphiteControls
