@@ -5,6 +5,8 @@
 // picture with them still draws the rest. Drawing scales the frame to the
 // destination rectangle.
 
+import protocol Foundation.ContiguousBytes
+import struct Foundation.Data
 import GraphiteBase
 
 /// Decodes a QuickTime-compressed image in a picture: JPEG, PNG and the
@@ -79,7 +81,7 @@ public struct Picture {
 
     /// A picture's bytes, from picSize. Throws for a picture that ends
     /// before its end opcode, or whose data is malformed.
-    public init(bytes: [UInt8]) throws(MacError) {
+    public init(bytes: some ContiguousBytes) throws(MacError) {
         var reader = BigEndianReader(bytes)
         do {
             try reader.skip(2)                                  // picSize: its low 16 bits alone
@@ -104,9 +106,10 @@ public struct Picture {
     }
 
     /// A PICT file's picture: after its 512-byte header.
-    public init(file bytes: [UInt8]) throws(MacError) {
-        guard bytes.count > 512 else { throw .parameter }
-        try self.init(bytes: Array(bytes[512...]))
+    public init(file bytes: some ContiguousBytes) throws(MacError) {
+        let file = Data(zeroBased: bytes)
+        guard file.count > 512 else { throw .parameter }
+        try self.init(bytes: file[512...])
     }
 
     // MARK: Drawing
