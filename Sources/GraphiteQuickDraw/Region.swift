@@ -5,6 +5,7 @@
 // 0x7FFF) is read and written for programs that keep regions in their
 // memory.
 
+import protocol Foundation.ContiguousBytes
 import GraphiteBase
 
 public struct Region: Hashable, Sendable {
@@ -232,7 +233,7 @@ public struct Region: Hashable, Sendable {
     /// A region record. A record of 10 bytes is its rectangle; past those,
     /// its scanlines. Throws for one that ends early or whose points don't
     /// pair up.
-    public init(record bytes: [UInt8]) throws(MacError) {
+    public init(record bytes: some ContiguousBytes) throws(MacError) {
         do {
             var reader = BigEndianReader(bytes)
             let size = Int(try reader.read(UInt16.self))
