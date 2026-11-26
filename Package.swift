@@ -73,7 +73,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0"),
-        .package(url: "https://github.com/PureSwift/swift-freetype.git", branch: "master"),
+        .package(url: "https://github.com/PureSwift/swift-freetype.git", from: "0.1.1"),
     ],
     targets: [
         .target(
