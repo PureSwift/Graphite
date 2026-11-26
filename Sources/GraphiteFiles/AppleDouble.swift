@@ -72,7 +72,7 @@ public struct AppleDouble: Hashable, Sendable {
                 let offset = Int(try reader.read(UInt32.self))
                 let length = Int(try reader.read(UInt32.self))
                 let entry = try reader.subreader(at: offset, count: length)
-                entries.append(Entry(id: EntryID(rawValue: id), bytes: entry.bytes))
+                entries.append(Entry(id: EntryID(rawValue: id), bytes: Array(entry.bytes)))
             }
         } catch let error as MacError {
             throw error
