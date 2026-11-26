@@ -190,8 +190,38 @@ extension MacError: CustomStringConvertible {
             -1707: "errAENotAppleEvent", -1708: "errAEEventNotHandled", -1709: "errAEReplyNotValid",
             -1710: "errAEUnknownSendMode", -1712: "errAETimeout", -1717: "errAEHandlerNotFound",
             -1719: "errAEIllegalIndex",
+            -201: "notEnoughHardwareErr", -203: "queueFull", -204: "resProblem", -205: "badChannel",
+            -206: "badFormat", -207: "notEnoughBufferSpace", -208: "badFileFormat", -209: "channelBusy",
+            -210: "buffersTooSmall", -223: "siInvalidCompression",
         ]
         guard let name = names[code] else { return "\(code)" }
         return "\(name) (\(code))"
     }
+}
+
+// MARK: - Sound Manager
+
+public extension MacError {
+
+    /// notEnoughHardwareErr: the hardware can't do it.
+    static var notEnoughHardware: MacError { MacError(-201) }
+    /// queueFull: a channel's command queue has no room.
+    static var queueFull: MacError { MacError(-203) }
+    /// resProblem: a sound resource couldn't be loaded.
+    static var soundResourceProblem: MacError { MacError(-204) }
+    /// badChannel: the channel is corrupt or can't be used.
+    static var badChannel: MacError { MacError(-205) }
+    /// badFormat: a 'snd ' resource is corrupt or can't be used.
+    static var badFormat: MacError { MacError(-206) }
+    /// notEnoughBufferSpace: not enough memory for the sound.
+    static var notEnoughBufferSpace: MacError { MacError(-207) }
+    /// badFileFormat: a sound file is corrupt, or not AIFF or AIFF-C.
+    static var badFileFormat: MacError { MacError(-208) }
+    /// channelBusy: the channel is in use.
+    static var channelBusy: MacError { MacError(-209) }
+    /// buffersTooSmall: a double buffer's buffers are too small.
+    static var buffersTooSmall: MacError { MacError(-210) }
+    /// siInvalidCompression: the compression type isn't one the sound
+    /// manager has.
+    static var invalidCompression: MacError { MacError(-223) }
 }
