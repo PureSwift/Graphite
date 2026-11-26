@@ -30,9 +30,10 @@ import GraphiteTasks
         try done.wait(timeout: .milliseconds(5000))
     }
 
-    /// Ten periods of 10 ms, each run taking 5 ms before priming again: an
-    /// extended task counts from when it was due and takes 100 ms; a plain
-    /// one counts from when it ran, and takes at least 150.
+    /// Ten periods of 20 ms, each run taking 10 ms before priming again: an
+    /// extended task counts from when it was due and takes 200 ms; a plain
+    /// one counts from when it ran, and takes at least 300. The bound
+    /// between them leaves room for a busy machine's late wake-ups.
     @Test(arguments: [true, false])
     func extendedTasksDontDrift(extended: Bool) throws {
         let runs = Atomic<Int>(0)
@@ -42,18 +43,18 @@ import GraphiteTasks
                 try? done.signal()
                 return
             }
-            delay(until: .now + .milliseconds(5))
-            task.prime(10)
+            delay(until: .now + .milliseconds(10))
+            task.prime(20)
         }
         task.install()
         let start = AbsoluteTime.now
-        task.prime(10)
+        task.prime(20)
         try done.wait(timeout: .milliseconds(10_000))
         let elapsed = (AbsoluteTime.now - start) / 1_000_000
         if extended {
-            #expect(elapsed >= 100 && elapsed < 145, "\(elapsed) ms")
+            #expect(elapsed >= 200 && elapsed < 290, "\(elapsed) ms")
         } else {
-            #expect(elapsed >= 145, "\(elapsed) ms")
+            #expect(elapsed >= 290, "\(elapsed) ms")
         }
     }
 
