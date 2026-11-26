@@ -21,10 +21,10 @@ Carbon's spellings: Pascal strings in memory, handles, `OSErr` returns and
 Darwin's structure layouts are the job of the layer that exports Carbon.
 Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 
-> **Status:** early development. `GraphiteBase` and `GraphiteTasks` are in
-> place; the File and Resource Managers, Apple Events, QuickDraw, text, the
-> Toolbox's windows, menus, controls and dialogs, and the Sound Manager come
-> next.
+> **Status:** early development. `GraphiteBase`, `GraphiteTasks` and
+> `GraphiteFiles` are in place; the Resource Manager, Apple Events,
+> QuickDraw, text, the Toolbox's windows, menus, controls and dialogs, and
+> the Sound Manager come next.
 
 ## Modules
 
@@ -32,10 +32,13 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 |---|---|
 | `GraphiteBase` | Points and rectangles, four-character codes, result codes, Pascal strings and MacRoman, Mac dates and clocks, `Fixed`, `Fract`, 80-bit extended and SANE decimal numbers, QuickDraw's `Random`, big-endian reading and writing, the Script Manager's answers and Gestalt's table. |
 | `GraphiteTasks` | The Time Manager, Multiprocessing Services (tasks, queues, events, semaphores, critical regions, aligned memory), `AbsoluteTime` and durations, and atomic operations on a program's memory. |
+| `GraphiteFiles` | The File Manager over a POSIX file system: FSSpecs and colon paths, folder IDs, names in any case, forks by reference number, resource forks and Finder info in AppleDouble files (`._name`) or `name.rsrc`, catalog information, aliases that follow moved items, and FindFolder's folders. |
 | `Graphite` | Re-exports the modules above. |
 
-Everything depends only on the Swift standard library and the C library
-(Glibc, Musl or Darwin). Graphite builds for Linux on x86_64, arm64, i686
+Everything depends only on the Swift standard library, the C library
+(Glibc, Musl or Darwin) and System: Apple's on macOS, or one installed
+with CMake, else [swift-system](https://github.com/apple/swift-system)'s
+package. Graphite builds for Linux on x86_64, arm64, i686
 and 32-bit PowerPC, and for macOS, where it can be compared with Apple's
 CarbonCore.
 
@@ -51,6 +54,10 @@ let name = PascalString("Café")!                       // MacRoman bytes
 let type: FourCharCode = "snd "
 
 let date = MacDate.now.parts                           // DateTimeRec
+
+let files = FileSystem()
+let (spec, _) = try files.makeSpec(volume: 0, directory: 0, name: ":Data:Level 1")
+let (reference, fork) = try files.open(files.path(of: spec)!, fork: .resource, permission: .read)
 
 let queue = MPQueue()
 let task = try MPTask.create(queue: queue, terminationWords: (1, 2)) { 0 }
