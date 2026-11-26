@@ -199,7 +199,7 @@ extension MacError: CustomStringConvertible {
             -30583: "errWindowDoesntSupportFocus", -30584: "errUnknownControl", -30585: "errCouldntSetFocus",
             -30586: "errNoRootControl", -30587: "errRootAlreadyExists", -30588: "errInvalidPartCode",
             -30589: "errControlsAlreadyExist", -30590: "errControlIsNotEmbedder",
-            -30592: "errControlHiddenOrDisabled", -30596: "errItemNotControl",
+            -30592: "errControlHiddenOrDisabled", -30596: "errItemNotControl", -5640: "dialogNoTimeoutErr",
         ]
         guard let name = names[code] else { return "\(code)" }
         return "\(name) (\(code))"
@@ -279,4 +279,12 @@ public extension MacError {
     static var controlHiddenOrDisabled: MacError { MacError(-30592) }
     /// errItemNotControl: a dialog item that isn't one.
     static var itemNotControl: MacError { MacError(-30596) }
+}
+
+// MARK: - Dialog Manager
+
+public extension MacError {
+
+    /// dialogNoTimeoutErr: no timeout was set for the modal session.
+    static var dialogNoTimeout: MacError { MacError(-5640) }
 }
