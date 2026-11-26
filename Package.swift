@@ -103,7 +103,7 @@ let package = Package(
         ),
         .target(
             name: "GraphiteQuickDraw",
-            dependencies: ["GraphiteBase"]
+            dependencies: ["GraphiteBase", "GraphiteFiles", "GraphiteResources"]
         ),
         .systemLibrary(
             name: "CFreeType",
@@ -143,7 +143,7 @@ let package = Package(
         ),
         .testTarget(
             name: "GraphiteQuickDrawTests",
-            dependencies: ["GraphiteQuickDraw"]
+            dependencies: ["GraphiteQuickDraw", "GraphiteFiles", "GraphiteResources"]
         ),
         .testTarget(
             name: "GraphiteTextTests",
