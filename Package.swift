@@ -22,6 +22,9 @@ import PackageDescription
 ///   system font, and QuickDraw's text.
 /// - `GraphiteSound`: sampled sounds from 'snd ' resources and AIFF files,
 ///   the codecs that decode them, and the channels and mixer that play them.
+/// - `GraphiteWindows`: the Window Manager: windows of every class, the
+///   window list, FindWindow, zooming and collapsing, the visible and
+///   update regions, and the content's buffer the host flushes.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
