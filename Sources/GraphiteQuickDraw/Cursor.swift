@@ -3,6 +3,8 @@
 // Where data and mask are both set the pixel is black; mask alone, white;
 // data alone, the screen inverted; neither, the screen as it is.
 
+import protocol Foundation.ContiguousBytes
+import struct Foundation.Data
 import GraphiteBase
 
 public struct Cursor: Hashable, Sendable {
@@ -32,7 +34,7 @@ public struct Cursor: Hashable, Sendable {
 
     /// A 'CURS' resource or a Cursor record: data, mask, hot spot (68
     /// bytes).
-    public init(curs bytes: [UInt8]) throws(MacError) {
+    public init(curs bytes: some ContiguousBytes) throws(MacError) {
         do {
             var reader = BigEndianReader(bytes)
             let data = try (0 ..< 16).map { _ throws(BigEndianReadError) in try reader.read(UInt16.self) }
@@ -57,9 +59,10 @@ public struct Cursor: Hashable, Sendable {
     /// A 'crsr' resource: its CCrsr record (crsrType, offsets of its pixel
     /// map and pixels, its 1-bit data, mask and hot spot), then the pixel
     /// map, which points to its color table by offset too.
-    public init(crsr bytes: [UInt8]) throws(MacError) {
+    public init(crsr bytes: some ContiguousBytes) throws(MacError) {
+        let source = Data(zeroBased: bytes)
         do {
-            var reader = BigEndianReader(bytes)
+            var reader = BigEndianReader(source)
             try reader.skip(2)                                          // crsrType
             let mapOffset = Int(try reader.read(UInt32.self))
             let dataOffset = Int(try reader.read(UInt32.self))
@@ -67,7 +70,7 @@ public struct Cursor: Hashable, Sendable {
             let data = try (0 ..< 16).map { _ throws(BigEndianReadError) in try reader.read(UInt16.self) }
             let mask = try (0 ..< 16).map { _ throws(BigEndianReadError) in try reader.read(UInt16.self) }
             let v = Int16(bitPattern: try reader.read(UInt16.self)), h = Int16(bitPattern: try reader.read(UInt16.self))
-            var map = try BigEndianReader(bytes).subreader(at: mapOffset, count: 50)
+            var map = try BigEndianReader(source).subreader(at: mapOffset, count: 50)
             try map.skip(4)
             let rowBytes = Int(try map.read(UInt16.self) & 0x3FFF)
             let top = Int(Int16(bitPattern: try map.read(UInt16.self))), left = Int(Int16(bitPattern: try map.read(UInt16.self)))
@@ -78,11 +81,11 @@ public struct Cursor: Hashable, Sendable {
             let tableOffset = Int(try map.read(UInt32.self))
             let width = right - left, height = bottom - top
             guard width > 0, height > 0, width <= 64, height <= 64, [1, 2, 4, 8].contains(depth) else { throw MacError.parameter }
-            var tableReader = try BigEndianReader(bytes).subreader(at: tableOffset, count: 8)
+            var tableReader = try BigEndianReader(source).subreader(at: tableOffset, count: 8)
             try tableReader.skip(6)
             let entries = Int(try tableReader.read(UInt16.self)) + 1
-            let table = try ColorTable(clut: try BigEndianReader(bytes).subreader(at: tableOffset, count: 8 + entries * 8).bytes)
-            let pixels = try BigEndianReader(bytes).subreader(at: dataOffset, count: rowBytes * height).bytes
+            let table = try ColorTable(clut: try BigEndianReader(source).subreader(at: tableOffset, count: 8 + entries * 8).bytes)
+            let pixels = try BigEndianReader(source).subreader(at: dataOffset, count: rowBytes * height).bytes
             var image: [UInt32] = []
             for row in 0 ..< height {
                 for column in 0 ..< width {
