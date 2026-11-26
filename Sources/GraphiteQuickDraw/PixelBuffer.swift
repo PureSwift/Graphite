@@ -74,6 +74,10 @@ public final class PixelBuffer {
     /// An indexed buffer's colors.
     public var colorTable: ColorTable
 
+    /// The entries of the color table that colors are not matched to,
+    /// because a program keeps them for its own use (ReserveEntry).
+    public var reservedEntries: Set<Int> = []
+
     /// Whether the memory is the buffer's to free.
     private let ownsMemory: Bool
 
@@ -163,7 +167,7 @@ public final class PixelBuffer {
     /// its bits; 32-bit pixels opaque.
     public func value(for color: RGBColor) -> UInt32 {
         switch format {
-        case .indexed: UInt32(colorTable.index(of: color))
+        case .indexed: UInt32(colorTable.index(of: color, excluding: reservedEntries))
         case .rgb555: UInt32(color.red >> 11) << 10 | UInt32(color.green >> 11) << 5 | UInt32(color.blue >> 11)
         case .argb32: 0xFF00_0000 | UInt32(color.red8) << 16 | UInt32(color.green8) << 8 | UInt32(color.blue8)
         }
