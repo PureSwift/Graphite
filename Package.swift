@@ -21,7 +21,7 @@ import PackageDescription
 /// - `GraphiteText`: fonts, the Font Manager's families, the built-in
 ///   system font, and QuickDraw's text.
 /// - `GraphiteSound`: sampled sounds from 'snd ' resources and AIFF files,
-///   and the codecs that decode them.
+///   the codecs that decode them, and the channels and mixer that play them.
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C

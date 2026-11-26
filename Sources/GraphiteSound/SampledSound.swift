@@ -5,7 +5,7 @@ import protocol Foundation.ContiguousBytes
 import struct Foundation.Data
 import GraphiteBase
 
-public struct SampledSound: Sendable {
+public struct SampledSound: Hashable, Sendable {
 
     public var encoding: SoundEncoding
 
