@@ -13,3 +13,4 @@
 @_exported import GraphiteMenus
 @_exported import GraphiteControls
 @_exported import GraphiteDialogs
+@_exported import GraphiteEvents
