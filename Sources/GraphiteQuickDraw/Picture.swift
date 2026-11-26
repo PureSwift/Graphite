@@ -30,6 +30,12 @@ public enum PictureVerb: Int, Hashable, Sendable {
     case frame, paint, erase, invert, fill
 }
 
+/// Draws a picture's text: the host's text engine, which draws MacRoman
+/// bytes at the port's pen in the port's text settings.
+public protocol PictureTextDrawer {
+    func drawText(macRoman bytes: [UInt8], in port: Port)
+}
+
 public struct Picture {
 
     public enum Operation {
@@ -107,7 +113,7 @@ public struct Picture {
 
     /// DrawPicture: the picture scaled from its frame to a rectangle in the
     /// port's coordinates, in the port's state, which is restored after.
-    public func draw(in port: Port, destination: Rect, decoder: (any PictureImageDecoder)? = nil) {
+    public func draw(in port: Port, destination: Rect, decoder: (any PictureImageDecoder)? = nil, text: (any PictureTextDrawer)? = nil) {
         let saved = (port.pen, port.foreColor, port.backColor, port.backPattern, port.fillPattern, port.clipRegion, port.text)
         defer { (port.pen, port.foreColor, port.backColor, port.backPattern, port.fillPattern, port.clipRegion, port.text) = saved }
         let map = Mapping(frame: frame, destination: destination)
@@ -134,8 +140,10 @@ public struct Picture {
             case .textFace(let face): port.text.face = face
             case .textSize(let size): port.text.size = size
             case .textMode(let mode): port.text.mode = mode
-            case .fontName, .text, .comment:
-                // Text is drawn by the text engine, which isn't here yet.
+            case .text(let string, let location):
+                port.move(to: map.point(location))
+                text?.drawText(macRoman: string.bytes, in: port)
+            case .fontName, .comment:
                 break
             case .line(let from, let to):
                 port.move(to: map.point(from))
