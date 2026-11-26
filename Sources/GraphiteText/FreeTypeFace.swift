@@ -87,6 +87,53 @@ public final class FreeTypeFace: FontFace, @unchecked Sendable {
         lock.withLock { _ in FT_Get_Char_Index(face, FT_ULong(character.value)) != 0 }
     }
 
+    /// A table of an sfnt font by its tag; nil for a table it hasn't and for
+    /// a font that isn't an sfnt (Type 1, say).
+    public func table(_ tag: FourCharCode) -> [UInt8]? {
+        lock.withLock { _ in
+            var length: FT_ULong = 0
+            guard FT_Load_Sfnt_Table(face, FT_ULong(tag.rawValue), 0, nil, &length) == 0 else { return nil }
+            var bytes = [UInt8](repeating: 0, count: Int(length))
+            guard FT_Load_Sfnt_Table(face, FT_ULong(tag.rawValue), 0, &bytes, &length) == 0 else { return nil }
+            return bytes
+        }
+    }
+
+    /// Ascent, descent and the rest in ems, from the face's own numbers
+    /// and its 'OS/2' and 'post' tables where it has them. Without an
+    /// 'OS/2' table the average advance is half the maximum and the cap
+    /// and x heights are the ascent and half of it, as with an 'OS/2'
+    /// older than version 2.
+    public var horizontalMetrics: HorizontalFontMetrics? {
+        lock.withLock { _ in
+            let record = face.pointee
+            let em = record.units_per_EM == 0 ? 1000.0 : Double(record.units_per_EM)
+            let ascent = Double(record.ascender) / em
+            var metrics = HorizontalFontMetrics(
+                ascent: ascent,
+                descent: Double(record.descender) / em,
+                leading: max(0, Double(record.height - record.ascender + record.descender) / em),
+                maximumAdvance: Double(record.max_advance_width) / em,
+                minimumLeftSideBearing: Double(record.bbox.xMin) / em,
+                underlinePosition: Double(record.underline_position) / em,
+                underlineThickness: Double(record.underline_thickness) / em)
+            if let table = FT_Get_Sfnt_Table(face, FT_SFNT_OS2) {
+                let os2 = table.assumingMemoryBound(to: TT_OS2.self).pointee
+                metrics.averageAdvance = Double(os2.xAvgCharWidth) / em
+                metrics.capHeight = os2.version >= 2 ? Double(os2.sCapHeight) / em : ascent
+                metrics.xHeight = os2.version >= 2 ? Double(os2.sxHeight) / em : ascent / 2
+            } else {
+                metrics.averageAdvance = metrics.maximumAdvance / 2
+                metrics.capHeight = ascent
+                metrics.xHeight = ascent / 2
+            }
+            if let table = FT_Get_Sfnt_Table(face, FT_SFNT_POST) {
+                metrics.italicAngle = Double(table.assumingMemoryBound(to: TT_Postscript.self).pointee.italicAngle) / 65536
+            }
+            return metrics
+        }
+    }
+
     public func metrics(size: Int) -> FontMetrics {
         lock.withLock { _ in
             setSize(size)
