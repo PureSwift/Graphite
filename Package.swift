@@ -23,8 +23,10 @@ import PackageDescription
 /// - `Graphite`: re-exports the modules above.
 ///
 /// Everything here depends only on the Swift standard library, the C
-/// library (Glibc, Musl or Darwin) and System (Apple's, or swift-system). No
-/// Foundation.
+/// library (Glibc, Musl or Darwin), System (Apple's, or swift-system) and
+/// Foundation, which it uses for bytes (`Data`, `ContiguousBytes`) and
+/// property lists. `GraphiteText` also depends on swift-freetype, with the
+/// `FreeType` trait.
 let package = Package(
     name: "Graphite",
     platforms: [
