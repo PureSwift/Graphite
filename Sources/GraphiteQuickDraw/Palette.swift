@@ -42,6 +42,11 @@ public final class Palette {
 
     public private(set) var entries: [PaletteEntry]
 
+    /// The entry of a device's table each of the palette's entries is
+    /// given while the palette is active on it; nil for one that has none.
+    /// Empty while it isn't active.
+    public internal(set) var deviceIndices: [Int?] = []
+
     /// NewPalette: `count` entries, their colors from a table's where it has
     /// them (CTab2Palette) and black where it hasn't, all with one usage and
     /// tolerance.
