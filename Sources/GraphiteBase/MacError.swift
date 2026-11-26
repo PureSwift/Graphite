@@ -121,6 +121,21 @@ public extension MacError {
     static var forkExists: MacError { MacError(-1421) }
     /// errFSForkNotFound: the fork isn't there.
     static var forkNotFound: MacError { MacError(-1424) }
+
+    // Resource Manager
+
+    /// resNotFound: no resource of the type and ID or name.
+    static var resourceNotFound: MacError { MacError(-192) }
+    /// resFNotFound: no open resource file of the reference number.
+    static var resourceFileNotFound: MacError { MacError(-193) }
+    /// addResFailed: the resource couldn't be added.
+    static var addResourceFailed: MacError { MacError(-194) }
+    /// rmvResFailed: the resource couldn't be removed.
+    static var removeResourceFailed: MacError { MacError(-196) }
+    /// resAttrErr: the resource's attributes don't allow it.
+    static var resourceAttribute: MacError { MacError(-198) }
+    /// mapReadErr: the resource map is damaged.
+    static var mapRead: MacError { MacError(-199) }
 }
 
 extension MacError: CustomStringConvertible {
@@ -137,7 +152,8 @@ extension MacError: CustomStringConvertible {
             -39: "eofErr", -40: "posErr", -42: "tmfoErr", -43: "fnfErr", -44: "wPrErr", -45: "fLckdErr",
             -47: "fBsyErr", -48: "dupFNErr", -49: "opWrErr", -51: "rfNumErr", -54: "permErr", -61: "wrPermErr",
             -120: "dirNFErr", -1302: "afpItemNotFound", -1417: "errFSNoMoreItems", -1421: "errFSForkExists",
-            -1424: "errFSForkNotFound",
+            -1424: "errFSForkNotFound", -192: "resNotFound", -193: "resFNotFound", -194: "addResFailed",
+            -196: "rmvResFailed", -198: "resAttrErr", -199: "mapReadErr",
         ]
         guard let name = names[code] else { return "\(code)" }
         return "\(name) (\(code))"

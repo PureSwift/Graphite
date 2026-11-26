@@ -21,8 +21,8 @@ Carbon's spellings: Pascal strings in memory, handles, `OSErr` returns and
 Darwin's structure layouts are the job of the layer that exports Carbon.
 Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 
-> **Status:** early development. `GraphiteBase`, `GraphiteTasks` and
-> `GraphiteFiles` are in place; the Resource Manager, Apple Events,
+> **Status:** early development. `GraphiteBase`, `GraphiteTasks`,
+> `GraphiteFiles` and `GraphiteResources` are in place; Apple Events,
 > QuickDraw, text, the Toolbox's windows, menus, controls and dialogs, and
 > the Sound Manager come next.
 
@@ -33,6 +33,7 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 | `GraphiteBase` | Points and rectangles, four-character codes, result codes, Pascal strings and MacRoman, Mac dates and clocks, `Fixed`, `Fract`, 80-bit extended and SANE decimal numbers, QuickDraw's `Random`, big-endian reading and writing, the Script Manager's answers and Gestalt's table. |
 | `GraphiteTasks` | The Time Manager, Multiprocessing Services (tasks, queues, events, semaphores, critical regions, aligned memory), `AbsoluteTime` and durations, and atomic operations on a program's memory. |
 | `GraphiteFiles` | The File Manager over a POSIX file system: FSSpecs and colon paths, folder IDs, names in any case, forks by reference number, resource forks and Finder info in AppleDouble files (`._name`) or `name.rsrc`, catalog information, aliases that follow moved items, and FindFolder's folders. |
+| `GraphiteResources` | The Resource Manager: resource maps read with every offset checked and written back, resource files changed in memory and updated, the chain of open files with `Get` and `Get1` searches, and `STR#`, `STR ` and `vers` resources. |
 | `Graphite` | Re-exports the modules above. |
 
 Everything depends only on the Swift standard library, the C library
@@ -57,7 +58,9 @@ let date = MacDate.now.parts                           // DateTimeRec
 
 let files = FileSystem()
 let (spec, _) = try files.makeSpec(volume: 0, directory: 0, name: ":Data:Level 1")
-let (reference, fork) = try files.open(files.path(of: spec)!, fork: .resource, permission: .read)
+let resources = ResourceChain(fileSystem: files)
+try resources.open(files.path(of: spec)!)
+let messages = try StringList(bytes: resources.get(type: "STR#", id: 128).bytes ?? [])
 
 let queue = MPQueue()
 let task = try MPTask.create(queue: queue, terminationWords: (1, 2)) { 0 }
