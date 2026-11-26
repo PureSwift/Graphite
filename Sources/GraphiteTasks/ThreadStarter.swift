@@ -1,7 +1,7 @@
 // How Graphite starts the threads that run Multiprocessing Services' tasks.
-// Linux programs use POSIX threads as they are; Perry starts them through
-// the program's own libSystem, so a task's thread is set up as the
-// program's threads are.
+// Linux programs use POSIX threads as they are; a layer that runs Mac
+// programs can start them through the program's own libSystem, so a task's
+// thread is set up as the program's threads are.
 
 #if canImport(Glibc)
 import Glibc
