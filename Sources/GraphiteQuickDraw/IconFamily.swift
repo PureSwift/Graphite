@@ -4,6 +4,7 @@
 // alpha. Indexed icons use the system's 4- and 8-bit tables.
 
 import protocol Foundation.ContiguousBytes
+import struct Foundation.Data
 import GraphiteBase
 
 /// An icon family's members by their types, and the best image of each
@@ -142,9 +143,10 @@ public struct ColorIcon: Sendable {
     /// The 'cicn' resource's IconPMap (50 bytes), maskBMap and iconBMap
     /// (14 each), iconData (4), then the mask's rows, the 1-bit image's,
     /// the pixel map's color table and its rows.
-    public init(cicn bytes: [UInt8]) throws(MacError) {
+    public init(cicn bytes: some ContiguousBytes) throws(MacError) {
+        let source = Data(zeroBased: bytes)
         do {
-            var reader = BigEndianReader(bytes)
+            var reader = BigEndianReader(source)
             try reader.skip(4)                                          // baseAddr
             let rowBytes = Int(try reader.read(UInt16.self) & 0x3FFF)
             let bounds = try Self.rect(&reader)
@@ -164,7 +166,7 @@ public struct ColorIcon: Sendable {
             let tableStart = reader.offset
             try reader.skip(6)
             let entries = Int(try reader.read(UInt16.self)) + 1
-            let table = try ColorTable(clut: Array(try BigEndianReader(bytes).subreader(at: tableStart, count: 8 + entries * 8).bytes))
+            let table = try ColorTable(clut: try BigEndianReader(source).subreader(at: tableStart, count: 8 + entries * 8).bytes)
             try reader.seek(to: tableStart + 8 + entries * 8)
             let pixels = Array(try reader.readBytes(rowBytes * height))
             self.bounds = bounds
