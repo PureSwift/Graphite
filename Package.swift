@@ -9,10 +9,14 @@ import PackageDescription
 ///   writing, the Script Manager's answers and Gestalt's table.
 /// - `GraphiteTasks`: the Time Manager, Multiprocessing Services and
 ///   atomic operations on a program's memory.
+/// - `GraphiteFiles`: the File Manager over a POSIX file system: FSSpecs,
+///   folder IDs, forks, resource forks and Finder info in AppleDouble
+///   files, catalog information, aliases and special folders.
 /// - `Graphite`: re-exports the modules above.
 ///
-/// Everything here depends only on the Swift standard library and the C
-/// library (Glibc, Musl or Darwin). No Foundation.
+/// Everything here depends only on the Swift standard library, the C
+/// library (Glibc, Musl or Darwin) and System (Apple's, or swift-system). No
+/// Foundation.
 let package = Package(
     name: "Graphite",
     platforms: [
@@ -30,7 +34,14 @@ let package = Package(
         .library(
             name: "GraphiteTasks",
             targets: ["GraphiteTasks"]
+        ),
+        .library(
+            name: "GraphiteFiles",
+            targets: ["GraphiteFiles"]
         )
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0")
     ],
     targets: [
         .target(
@@ -41,8 +52,21 @@ let package = Package(
             dependencies: ["GraphiteBase"]
         ),
         .target(
+            name: "GraphiteFiles",
+            dependencies: [
+                "GraphiteBase",
+                // Apple's System on macOS, or one installed with CMake: else
+                // swift-system's package.
+                .product(
+                    name: "SystemPackage",
+                    package: "swift-system",
+                    condition: .when(platforms: [.linux, .android, .windows, .wasi, .openbsd])
+                )
+            ]
+        ),
+        .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -51,6 +75,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteTasksTests",
             dependencies: ["GraphiteTasks"]
+        ),
+        .testTarget(
+            name: "GraphiteFilesTests",
+            dependencies: ["GraphiteFiles"]
         )
     ]
 )
