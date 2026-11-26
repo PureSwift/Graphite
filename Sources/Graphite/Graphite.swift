@@ -8,3 +8,4 @@
 @_exported import GraphiteAppleEvents
 @_exported import GraphiteQuickDraw
 @_exported import GraphiteText
+@_exported import GraphiteSound
