@@ -1,5 +1,6 @@
 // The color table a device's indexed pixels look up: Index2Color,
-// SetEntries and RestoreDeviceClut, and CTabChanged for any table.
+// SetEntries, ReserveEntry, ProtectEntry and RestoreDeviceClut, and
+// CTabChanged for any table.
 
 import GraphiteBase
 
@@ -22,22 +23,45 @@ extension GraphicsDevice {
     }
 
     /// SetEntries: colors written into the device's table from `start`,
-    /// as many as the table has room for. Does nothing on a direct device.
+    /// as many as the table has room for, except the protected entries,
+    /// which keep their colors. Does nothing on a direct device.
     public func setEntries(from start: Int, colors: [RGBColor]) throws(MacError) {
         guard pixels.format.isIndexed else { return }
         guard start >= 0, start < pixels.colorTable.colors.count else { throw .parameter }
         for (offset, color) in colors.enumerated() where start + offset < pixels.colorTable.colors.count {
-            pixels.colorTable.colors[start + offset] = color
+            if !protectedEntries.contains(start + offset) { pixels.colorTable.colors[start + offset] = color }
         }
         pixels.colorTable.changed()
     }
 
+    /// ReserveEntry: a reserved entry is one no color is matched to, as
+    /// Color2Index and drawing in a color find the nearest; a program keeps
+    /// it to set as it likes. Parameter error for an entry the table hasn't;
+    /// does nothing on a direct device.
+    public func reserveEntry(_ index: Int, _ reserve: Bool) throws(MacError) {
+        guard pixels.format.isIndexed else { return }
+        guard index >= 0, index < pixels.colorTable.colors.count else { throw .parameter }
+        if reserve { pixels.reservedEntries.insert(index) } else { pixels.reservedEntries.remove(index) }
+    }
+
+    /// ProtectEntry: a protected entry keeps its color through SetEntries.
+    /// Parameter error for an entry the table hasn't; does nothing on a
+    /// direct device.
+    public func protectEntry(_ index: Int, _ protect: Bool) throws(MacError) {
+        guard pixels.format.isIndexed else { return }
+        guard index >= 0, index < pixels.colorTable.colors.count else { throw .parameter }
+        if protect { protectedEntries.insert(index) } else { protectedEntries.remove(index) }
+    }
+
     /// RestoreDeviceClut: the system's standard table for the device's
-    /// depth again. Does nothing on a direct device.
+    /// depth again, with no entry reserved or protected. Does nothing on a
+    /// direct device.
     public func restoreColorTable() {
         guard pixels.format.isIndexed, var standard = ColorTable.standard(depth: depth) else { return }
         standard.seed = pixels.colorTable.seed
         standard.changed()
         pixels.colorTable = standard
+        pixels.reservedEntries = []
+        protectedEntries = []
     }
 }
