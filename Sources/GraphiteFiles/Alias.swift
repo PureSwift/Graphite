@@ -1,11 +1,10 @@
 // Aliases: records of an item that find it again after it moves. The
 // Toolbox keeps an alias record opaque past its user type and size, which
 // the layer that exports Carbon writes in its own byte order. After them
-// Graphite keeps what Perry's aliases always have: 'PRRY', the item's path
-// and a zero; and after those its device and inode, so that an item that
-// moved is found by them. A record with the path alone, as Perry's C and
-// CoreServices' Swift wrote and programs may have kept in their
-// preferences, resolves by its path.
+// Graphite keeps a mark, 'PRRY', the item's path and a zero; and after those
+// its device and inode, so that an item that moved is found by them. A
+// record with the path alone, as earlier records of the format have and
+// programs may have kept in their preferences, resolves by its path.
 
 import GraphiteBase
 
@@ -33,7 +32,7 @@ public struct Alias: Hashable, Sendable {
         self.init(path: Paths.standardized(path), device: item.device, inode: item.inode, isDirectory: item.isDirectory)
     }
 
-    /// 'PRRY', the mark of Perry's and Graphite's records.
+    /// 'PRRY', the mark of records of this format.
     public static var mark: FourCharCode { "PRRY" }
 
     /// The record after its user type and size.
@@ -51,7 +50,7 @@ public struct Alias: Hashable, Sendable {
     }
 
     /// An alias from its record after its user type and size: paramErr for
-    /// one that isn't Perry's or Graphite's.
+    /// one not of this format.
     public init(record: some Collection<UInt8>) throws(MacError) {
         let bytes = Array(record)
         var reader = BigEndianReader(bytes)
