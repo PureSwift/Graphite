@@ -1,6 +1,7 @@
 // FindFolder: the special folders a program asks for by type. A Linux
-// program gets the XDG base and user directories; Perry gives the folders
-// its Foundation's search paths give, in the home's Library.
+// program gets the XDG base and user directories; a Mac program can be
+// given the folders its Foundation's search paths give, in the home's
+// Library.
 
 #if canImport(Glibc)
 import Glibc
@@ -78,7 +79,7 @@ public struct FolderLocations: Sendable {
     }
 
     /// As a Mac's home has them, in `home`'s Library, which is where
-    /// Foundation's search paths put them for Perry's programs.
+    /// Foundation's search paths put them.
     public static func macHome(_ home: String) -> FolderLocations {
         FolderLocations { type in
             switch type {
