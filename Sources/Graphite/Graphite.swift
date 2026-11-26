@@ -6,3 +6,4 @@
 @_exported import GraphiteFiles
 @_exported import GraphiteResources
 @_exported import GraphiteAppleEvents
+@_exported import GraphiteQuickDraw
