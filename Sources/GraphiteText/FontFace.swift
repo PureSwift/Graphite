@@ -87,8 +87,19 @@ public protocol FontFace: AnyObject, Sendable {
 
     /// A character's image; nil for one the face hasn't.
     func glyph(for character: Unicode.Scalar, size: Int) -> GlyphImage?
+
+    /// An sfnt table's bytes by its tag ('head', 'name', 'OS/2'), as
+    /// ATSFontGetTable reads them; nil where the face has no such table,
+    /// as a bitmap font has none.
+    func table(_ tag: FourCharCode) -> [UInt8]?
+
+    /// The font's metrics in ems, as ATSFontGetHorizontalMetrics gives them;
+    /// nil for a face that isn't an outline font.
+    var horizontalMetrics: HorizontalFontMetrics? { get }
 }
 
 public extension FontFace {
     func hasStyle(_ style: TextStyle) -> Bool { style.isEmpty }
+    func table(_ tag: FourCharCode) -> [UInt8]? { nil }
+    var horizontalMetrics: HorizontalFontMetrics? { nil }
 }
