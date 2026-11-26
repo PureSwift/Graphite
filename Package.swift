@@ -83,6 +83,10 @@ let package = Package(
         .library(
             name: "GraphiteMenus",
             targets: ["GraphiteMenus"]
+        ),
+        .library(
+            name: "GraphiteControls",
+            targets: ["GraphiteControls"]
         )
     ],
     // FreeType reads outline fonts; builds without it keep the bitmap font.
@@ -147,8 +151,12 @@ let package = Package(
             dependencies: ["GraphiteBase"]
         ),
         .target(
+            name: "GraphiteControls",
+            dependencies: ["GraphiteBase"]
+        ),
+        .target(
             name: "Graphite",
-            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows", "GraphiteMenus"]
+            dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows", "GraphiteMenus", "GraphiteControls"]
         ),
         .testTarget(
             name: "GraphiteBaseTests",
@@ -189,6 +197,10 @@ let package = Package(
         .testTarget(
             name: "GraphiteMenusTests",
             dependencies: ["GraphiteMenus"]
+        ),
+        .testTarget(
+            name: "GraphiteControlsTests",
+            dependencies: ["GraphiteControls"]
         )
     ]
 )
