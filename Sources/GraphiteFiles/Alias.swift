@@ -79,7 +79,7 @@ public struct Alias: Hashable, Sendable {
             guard ItemStatus.exists(path) else { throw .fileNotFound }
             return (path, false)
         }
-        if let item = ItemStatus(path: path), item.device == device, item.inode == inode {
+        if let item = ItemStatus(path: path), item.device == device, item.inode == inode, item.isDirectory == isDirectory {
             return (path, false)
         }
         var places: [String] = []
@@ -97,7 +97,7 @@ public struct Alias: Hashable, Sendable {
         }
         var searched: Set<String> = []
         for place in places where place != "/" && searched.insert(place).inserted {
-            if let found = Self.find(device: device, inode: inode, below: place, depth: 3) { return (found, true) }
+            if let found = Self.find(device: device, inode: inode, isDirectory: isDirectory, below: place, depth: 3) { return (found, true) }
         }
         // Not found where it was looked for: the item now at its path, if
         // there is one.
@@ -105,17 +105,19 @@ public struct Alias: Hashable, Sendable {
         return (path, true)
     }
 
-    private static func find(device: UInt64, inode: UInt64, below folder: String, depth: Int) -> String? {
+    /// The item of a device and inode, of the kind the alias was made of: a
+    /// file system may give a deleted file's inode to a folder.
+    private static func find(device: UInt64, inode: UInt64, isDirectory: Bool, below folder: String, depth: Int) -> String? {
         guard depth > 0, let names = POSIX.names(inFolder: folder) else { return nil }
         var folders: [String] = []
         for name in names where !name.hasPrefix("._") {
             let path = Paths.appending(name, to: folder)
             guard let item = ItemStatus(path: path) else { continue }
-            if item.device == device, item.inode == inode { return path }
+            if item.device == device, item.inode == inode, item.isDirectory == isDirectory { return path }
             if item.isDirectory, !name.hasPrefix(".") { folders.append(path) }
         }
         for path in folders {
-            if let found = find(device: device, inode: inode, below: path, depth: depth - 1) { return found }
+            if let found = find(device: device, inode: inode, isDirectory: isDirectory, below: path, depth: depth - 1) { return found }
         }
         return nil
     }
