@@ -1,3 +1,5 @@
+import struct Foundation.Data
+import class Foundation.PropertyListSerialization
 import Testing
 import GraphiteBase
 import GraphiteFiles
@@ -104,6 +106,17 @@ import GraphiteQuickDraw
             <plist><dict><key>CFBundleIconFile</key><string>Icon.icns</string></dict></plist>
             """.utf8))
         folder.write("App.app/Contents/Resources/Icon.icns", icns([("ics#", smallIcon)]))
+        #expect(IconFamily(ofItemAt: folder.path("App.app"))?.sizes == [16])
+    }
+
+    @Test func aBundleWithABinaryInfoPlist() throws {
+        let folder = TemporaryFolder()
+        folder.makeFolder("App.app")
+        folder.makeFolder("App.app/Contents")
+        folder.makeFolder("App.app/Contents/Resources")
+        let plist = try PropertyListSerialization.data(fromPropertyList: ["CFBundleIconFile": "AppIcon"], format: .binary, options: 0)
+        folder.write("App.app/Contents/Info.plist", Array(plist))
+        folder.write("App.app/Contents/Resources/AppIcon.icns", icns([("ics#", smallIcon)]))
         #expect(IconFamily(ofItemAt: folder.path("App.app"))?.sizes == [16])
     }
 
