@@ -29,7 +29,7 @@ struct ItemStatus {
     var changed: Int64
     var accessed: Int64
     /// When the item was made, where the file system keeps it; else when its
-    /// status last changed, as Perry's C took it.
+    /// status last changed.
     var created: Int64
 
     var isDirectory: Bool { mode & UInt32(S_IFMT) == UInt32(S_IFDIR) }
