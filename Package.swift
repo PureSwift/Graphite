@@ -64,6 +64,11 @@ let package = Package(
             targets: ["GraphiteText"]
         )
     ],
+    // FreeType reads outline fonts; builds without it keep the bitmap font.
+    traits: [
+        .trait(name: "FreeType", description: "Outline fonts through FreeType"),
+        .default(enabledTraits: ["FreeType"]),
+    ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0")
     ],
@@ -100,9 +105,17 @@ let package = Package(
             name: "GraphiteQuickDraw",
             dependencies: ["GraphiteBase"]
         ),
+        .systemLibrary(
+            name: "CFreeType",
+            pkgConfig: "freetype2",
+            providers: [.apt(["libfreetype-dev"]), .brew(["freetype"])]
+        ),
         .target(
             name: "GraphiteText",
-            dependencies: ["GraphiteBase", "GraphiteQuickDraw"]
+            dependencies: [
+                "GraphiteBase", "GraphiteQuickDraw",
+                .target(name: "CFreeType", condition: .when(traits: ["FreeType"])),
+            ]
         ),
         .target(
             name: "Graphite",
