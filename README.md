@@ -26,8 +26,8 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 
 > **Status:** early development. `GraphiteBase`, `GraphiteTasks`,
 > `GraphiteFiles`, `GraphiteResources` and `GraphiteAppleEvents` are in
-> place, and `GraphiteQuickDraw` has begun; QuickDraw's drawing, pictures,
-> text, the Toolbox's windows, menus, controls and dialogs, and the Sound
+> place, and `GraphiteQuickDraw` draws; QuickDraw's pictures, icons and
+> cursors, text, the Toolbox's windows, menus, controls and dialogs, and the Sound
 > Manager come next.
 
 ## Modules
@@ -39,7 +39,7 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 | `GraphiteFiles` | The File Manager over a POSIX file system: FSSpecs and colon paths, folder IDs, names in any case, forks by reference number, resource forks and Finder info in AppleDouble files (`._name`) or `name.rsrc`, catalog information, aliases that follow moved items, and FindFolder's folders. |
 | `GraphiteResources` | The Resource Manager: resource maps read with every offset checked and written back, resource files changed in memory and updated, the chain of open files with `Get` and `Get1` searches, and `STR#`, `STR ` and `vers` resources. |
 | `GraphiteAppleEvents` | The Apple Event Manager: descriptors, lists, records and Apple events as values; coercions between text, numbers, booleans, codes, lists, records and file types (`furl`, `fss `, `alis`, and the host's), with installed handlers; the application's handlers by class and ID with wildcards; events sent to itself, and the required events. |
-| `GraphiteQuickDraw` | QuickDraw's pixels (1 to 8 bits indexed, 16 and 32 bits direct, big-endian on every CPU, in memory of its own or a program's), colors and the system's color tables, regions as real regions with QuickDraw's region records, patterns, transfer modes, ports, devices and offscreen worlds. |
+| `GraphiteQuickDraw` | QuickDraw's pixels (1 to 8 bits indexed, 16 and 32 bits direct, big-endian on every CPU, in memory of its own or a program's), colors and the system's color tables, regions as real regions with QuickDraw's region records, patterns, transfer modes, ports, devices and offscreen worlds; drawing rectangles, ovals, round rectangles, arcs, polygons, regions and lines with the pen, and CopyBits, CopyMask and ScrollRect between any depths. |
 | `Graphite` | Re-exports the modules above. |
 
 Everything depends only on the Swift standard library, the C library
