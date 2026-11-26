@@ -2,6 +2,8 @@
 // AppleDouble files from bytes. Every read checks its bounds and throws
 // past the end; none traps, whatever the bytes say.
 
+import struct Foundation.Data
+
 /// A read that went past the bytes there are.
 public struct BigEndianReadError: Error, Hashable, Sendable {
 
@@ -24,26 +26,33 @@ public struct BigEndianReadError: Error, Hashable, Sendable {
 /// Reads typed fields one after another from bytes.
 public struct BigEndianReader: Sendable {
 
-    public let bytes: [UInt8]
+    /// The bytes as given, which may be a slice that doesn't start at 0;
+    /// offsets are from its start.
+    private let storage: Data
 
     /// Where the next read starts.
     public var offset: Int
 
-    public init(_ bytes: [UInt8], offset: Int = 0) {
-        self.bytes = bytes
+    /// Reads the bytes where they are, without copying them: a file mapped
+    /// into memory is read as its pages are used.
+    public init(_ bytes: Data, offset: Int = 0) {
+        storage = bytes
         self.offset = offset
     }
 
-    public var count: Int { bytes.count }
+    /// All the bytes, from index 0 (a copy, if the reader is of a slice).
+    public var bytes: Data { storage.startIndex == 0 ? storage : Data(storage) }
 
-    public var remaining: Int { max(0, bytes.count - offset) }
+    public var count: Int { storage.count }
 
-    public var isAtEnd: Bool { offset >= bytes.count }
+    public var remaining: Int { max(0, storage.count - offset) }
+
+    public var isAtEnd: Bool { offset >= storage.count }
 
     /// The range of `count` bytes at `offset`, if they're all there.
     private func range(at offset: Int, count: Int) throws(BigEndianReadError) -> Range<Int> {
-        guard offset >= 0, count >= 0, offset <= bytes.count, count <= bytes.count - offset else {
-            throw BigEndianReadError(offset: offset, count: count, available: bytes.count)
+        guard offset >= 0, count >= 0, offset <= storage.count, count <= storage.count - offset else {
+            throw BigEndianReadError(offset: offset, count: count, available: storage.count)
         }
         return offset ..< offset + count
     }
@@ -53,7 +62,7 @@ public struct BigEndianReader: Sendable {
         let range = try range(at: offset, count: MemoryLayout<T>.size)
         var value: T = 0
         for index in range {
-            value = value << 8 | T(truncatingIfNeeded: bytes[index])
+            value = value << 8 | T(truncatingIfNeeded: storage[storage.startIndex + index])
         }
         return value
     }
@@ -64,10 +73,13 @@ public struct BigEndianReader: Sendable {
         return value
     }
 
-    public mutating func readBytes(_ count: Int) throws(BigEndianReadError) -> ArraySlice<UInt8> {
+    /// The next `count` bytes, as a slice of the reader's: its indices are
+    /// the reader's, not from 0, so take them with `Array(_:)` or by
+    /// iterating.
+    public mutating func readBytes(_ count: Int) throws(BigEndianReadError) -> Data {
         let range = try range(at: offset, count: count)
         offset = range.upperBound
-        return bytes[range]
+        return storage[storage.startIndex + range.lowerBound ..< storage.startIndex + range.upperBound]
     }
 
     public mutating func skip(_ count: Int) throws(BigEndianReadError) {
@@ -85,17 +97,18 @@ public struct BigEndianReader: Sendable {
     public mutating func align(to alignment: Int) {
         guard alignment > 1 else { return }
         let padding = (alignment - offset % alignment) % alignment
-        offset = min(offset + padding, max(offset, bytes.count))
+        offset = min(offset + padding, max(offset, storage.count))
     }
 
     /// A reader of the next `count` bytes, which this one moves past.
     public mutating func subreader(_ count: Int) throws(BigEndianReadError) -> BigEndianReader {
-        BigEndianReader(Array(try readBytes(count)))
+        BigEndianReader(try readBytes(count))
     }
 
     /// A reader of `count` bytes at `offset`, without moving.
     public func subreader(at offset: Int, count: Int) throws(BigEndianReadError) -> BigEndianReader {
-        BigEndianReader(Array(bytes[try range(at: offset, count: count)]))
+        let range = try range(at: offset, count: count)
+        return BigEndianReader(storage[storage.startIndex + range.lowerBound ..< storage.startIndex + range.upperBound])
     }
 }
 
