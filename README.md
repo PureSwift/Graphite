@@ -94,6 +94,15 @@ swift build
 swift test
 ```
 
+The optional `GraphiteSDLEvents` product supplies an SDL3 event-loop host.
+Install SDL3 (`brew install sdl3` or the SDL3 development package) and enable
+its trait with `swift build --traits SDL3`. Initialize SDL's event subsystem
+before constructing `SDLEventHost`, and supply a callback for SDL events the
+host does not translate. The SDL event pump must run on the main thread. The
+host's `globalPosition` callback maps window-local SDL mouse coordinates to
+global coordinates; provide it when windows are not at the origin. Translated
+events carry their SDL window ID in the `swin` parameter.
+
 ## License
 
 MIT. Code ported from [Pomme](https://github.com/jorio/Pomme) keeps its MIT
