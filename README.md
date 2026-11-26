@@ -27,9 +27,9 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 
 > **Status:** early development. `GraphiteBase`, `GraphiteTasks`,
 > `GraphiteFiles`, `GraphiteResources`, `GraphiteAppleEvents`,
-> `GraphiteQuickDraw`, `GraphiteText`, `GraphiteSound`, `GraphiteWindows`
-> and `GraphiteMenus` are in place, apart from the MACE codecs and
-> double-buffered sound. The Toolbox's controls and dialogs come next.
+> `GraphiteQuickDraw`, `GraphiteText`, `GraphiteSound`, `GraphiteWindows`,
+> `GraphiteMenus` and `GraphiteControls` are in place, apart from the MACE
+> codecs and double-buffered sound. The Toolbox's dialogs come next.
 
 ## Modules
 
@@ -45,6 +45,7 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 | `GraphiteSound` | The Sound Manager: sampled sounds from `'snd '` resources (formats 1 and 2, with the standard, compressed and extended headers) and AIFF and AIFF-C files, read to 16-bit PCM; the µ-law, A-law and IMA4 codecs (MACE is recognized but not decoded yet); sound channels with queued commands (`SndDoCommand`) including `callBackCmd`, `waitCmd` and `syncCmd`, immediate ones, volume, pan, pitch, loops and completion; a mixer that renders them to stereo float frames, for an audio device the host provides; and the frequencies of MIDI notes. |
 | `GraphiteWindows` | The Window Manager: windows of every class, from documents, dialogs and alerts to palettes, sheets and drawers, each with the standard Mac OS 8 and 9 frame or a window definition the host brings (the WDEF); the window list ordered by layer, `FrontWindow`, and the active document and the active palette; `FindWindow` and every part of a frame; showing, hiding, selecting, zooming between the user and standard states, collapsing; `MoveWindow`, `SizeWindow` and `SetWindowBounds`, with centering, cascading and the alert position; each window's content in an offscreen buffer with its visible region — what no window in front covers — its update region with `BeginUpdate` and `EndUpdate`, and the part of it the host is told to flush. |
 | `GraphiteMenus` | The Menu Manager: menus and their items — text in MacRoman, marks (the check mark and the diamond), icons, styles, keyboard equivalents with their modifiers, submenus by menu ID, command IDs — built with `AppendMenu`'s metacharacter strings or item by item; checked, enabled and disabled; the menu bar with `InsertMenu`'s order and its hierarchical list, `GetMenuHandle`, `MenuKey` and `EnableMenuCommand`; menu definitions (the MDEF) with the standard definition's sizes and item geometry; and `'MENU'` resources read with every field as the classic kept it, enable flags and submenus included. |
+| `GraphiteControls` | The Control Manager: controls of the classic's five kinds — buttons, checkboxes, radio buttons, scroll bars and pop-up menus, their control definition IDs and the `useWFont` variation read as the kind beneath it; values, ranges and the pinning SetControlValue did, with the pop-up menu's resource ID and title width in its minimum and maximum as the classic kept them; titles, reference values, command IDs, identifiers, enabling, disabling, activating and `HiliteControl`'s pressed part; the parts a point hits (inButton, inCheckBox, a scroll bar's arrows, pages and thumb), the fixed-size thumb of the classic's scroll bars and the value a drag names; a window's control list, FindControl, GetControlByID and Carbon's root control; and `'CNTL'` resources read field by field. |
 | `Graphite` | Re-exports the modules above. |
 
 Everything depends only on the Swift standard library, the C library
