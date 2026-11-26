@@ -4,6 +4,7 @@
 // they keep.
 
 import protocol Foundation.ContiguousBytes
+import struct Foundation.Data
 
 public extension Array where Element == UInt8 {
 
@@ -21,8 +22,9 @@ public extension Array where Element == UInt8 {
 
 public extension BigEndianReader {
 
-    /// A reader of the bytes of anything contiguous, from `offset`.
+    /// A reader of the bytes of anything contiguous, from `offset`. A Data
+    /// is read where it is; anything else is copied into one.
     init(_ bytes: some ContiguousBytes, offset: Int = 0) {
-        self.init(Array(copying: bytes), offset: offset)
+        self.init(bytes as? Data ?? bytes.withUnsafeBytes { Data($0) }, offset: offset)
     }
 }
