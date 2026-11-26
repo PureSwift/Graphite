@@ -22,9 +22,9 @@ Darwin's structure layouts are the job of the layer that exports Carbon.
 Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 
 > **Status:** early development. `GraphiteBase`, `GraphiteTasks`,
-> `GraphiteFiles` and `GraphiteResources` are in place; Apple Events,
-> QuickDraw, text, the Toolbox's windows, menus, controls and dialogs, and
-> the Sound Manager come next.
+> `GraphiteFiles`, `GraphiteResources` and `GraphiteAppleEvents` are in
+> place; QuickDraw, text, the Toolbox's windows, menus, controls and
+> dialogs, and the Sound Manager come next.
 
 ## Modules
 
@@ -34,6 +34,7 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 | `GraphiteTasks` | The Time Manager, Multiprocessing Services (tasks, queues, events, semaphores, critical regions, aligned memory), `AbsoluteTime` and durations, and atomic operations on a program's memory. |
 | `GraphiteFiles` | The File Manager over a POSIX file system: FSSpecs and colon paths, folder IDs, names in any case, forks by reference number, resource forks and Finder info in AppleDouble files (`._name`) or `name.rsrc`, catalog information, aliases that follow moved items, and FindFolder's folders. |
 | `GraphiteResources` | The Resource Manager: resource maps read with every offset checked and written back, resource files changed in memory and updated, the chain of open files with `Get` and `Get1` searches, and `STR#`, `STR ` and `vers` resources. |
+| `GraphiteAppleEvents` | The Apple Event Manager: descriptors, lists, records and Apple events as values; coercions between text, numbers, booleans, codes, lists, records and file types (`furl`, `fss `, `alis`, and the host's), with installed handlers; the application's handlers by class and ID with wildcards; events sent to itself, and the required events. |
 | `Graphite` | Re-exports the modules above. |
 
 Everything depends only on the Swift standard library, the C library
