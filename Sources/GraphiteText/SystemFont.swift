@@ -31,6 +31,24 @@ public final class SystemFont: FontFace {
         )
     }
 
+    /// Whether the font has a character: printable ASCII; it draws others
+    /// as "?".
+    private func hasGlyph(_ character: Unicode.Scalar) -> Bool {
+        let index = Int(character.value) - SystemFontGlyphs.firstCharacter
+        return index >= 0 && index < SystemFontGlyphs.glyphs.count
+    }
+
+    /// A character's code, which names its glyph; 0 for one it hasn't.
+    public func glyphID(for character: Unicode.Scalar) -> UInt16 {
+        hasGlyph(character) ? UInt16(character.value) : 0
+    }
+
+    /// The ink of a character's glyph; nil for one the font hasn't, which
+    /// it draws as "?".
+    public func glyphMetrics(for character: Unicode.Scalar, size: Int) -> GlyphMetrics? {
+        hasGlyph(character) ? glyph(for: character, size: size).map(GlyphMetrics.init(image:)) : nil
+    }
+
     /// A printable ASCII character's glyph; others are "?", as the
     /// original draws them.
     public func glyph(for character: Unicode.Scalar, size: Int) -> GlyphImage? {
