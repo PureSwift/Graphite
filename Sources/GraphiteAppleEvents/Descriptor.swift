@@ -166,7 +166,7 @@ public extension Descriptor {
     }
 
     /// A four-character code's descriptor's code.
-    var code: FourCharCode? { load(as: UInt32.self).map(FourCharCode.init) }
+    var code: FourCharCode? { load(as: UInt32.self).map { FourCharCode(rawValue: $0) } }
 }
 
 // MARK: - Printing
