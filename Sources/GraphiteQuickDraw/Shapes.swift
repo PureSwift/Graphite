@@ -4,6 +4,7 @@
 // the pen's rectangle, hanging below and to the right of each point the
 // line passes through.
 
+import protocol Foundation.ContiguousBytes
 import GraphiteBase
 
 /// A polygon: its points in order, closed or not.
@@ -42,7 +43,7 @@ public struct Polygon: Hashable, Sendable {
     }
 
     /// A polygon record: as many points as polySize says.
-    public init(record bytes: [UInt8]) throws(MacError) {
+    public init(record bytes: some ContiguousBytes) throws(MacError) {
         do {
             var reader = BigEndianReader(bytes)
             let size = Int(try reader.read(UInt16.self))

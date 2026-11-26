@@ -2,6 +2,7 @@
 // the tables indexed pixels look their colors up in, with the system's
 // standard ones for each depth.
 
+import protocol Foundation.ContiguousBytes
 import GraphiteBase
 
 /// QuickDraw's RGBColor: 16 bits a component.
@@ -140,7 +141,7 @@ public struct ColorTable: Hashable, Sendable {
     /// A 'clut' resource: ctSeed, ctFlags, ctSize (the count less one),
     /// then each entry's value and red, green and blue. A device table's
     /// entries are in order whatever their values say.
-    public init(clut bytes: [UInt8]) throws(MacError) {
+    public init(clut bytes: some ContiguousBytes) throws(MacError) {
         var reader = BigEndianReader(bytes)
         do {
             seed = Int32(bitPattern: try reader.read(UInt32.self))

@@ -2,6 +2,7 @@
 // NumVersion, a region code, and short and long version strings. ID 1 is the
 // file's version, 2 the package's it belongs to.
 
+import protocol Foundation.ContiguousBytes
 import GraphiteBase
 
 public struct VersionResource: Hashable, Sendable {
@@ -51,7 +52,7 @@ public struct VersionResource: Hashable, Sendable {
     }
 
     /// mapReadErr if the bytes end early.
-    public init(bytes: [UInt8]) throws(MacError) {
+    public init(bytes: some ContiguousBytes) throws(MacError) {
         var reader = BigEndianReader(bytes)
         do {
             major = try reader.read(UInt8.self)

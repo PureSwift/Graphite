@@ -16,6 +16,8 @@
 // Every offset is checked: a map that points outside its fork throws
 // mapReadErr, whatever its bytes say.
 
+import protocol Foundation.ContiguousBytes
+import struct Foundation.Data
 import GraphiteBase
 
 /// A resource's attributes.
@@ -112,7 +114,8 @@ public struct ResourceMap: Hashable, Sendable {
 
     /// The map of a fork's bytes: mapReadErr if any offset in it is outside
     /// them, eofErr if there are too few for a header.
-    public init(parsing bytes: [UInt8]) throws(MacError) {
+    public init(parsing contents: some ContiguousBytes) throws(MacError) {
+        let bytes = Data(zeroBased: contents)
         guard bytes.count >= 16 else { throw .endOfFile }
         do {
             var header = BigEndianReader(bytes)

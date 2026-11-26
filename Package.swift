@@ -70,7 +70,8 @@ let package = Package(
         .default(enabledTraits: ["FreeType"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0")
+        .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0"),
+        .package(url: "https://github.com/PureSwift/swift-freetype.git", branch: "master"),
     ],
     targets: [
         .target(
@@ -103,18 +104,13 @@ let package = Package(
         ),
         .target(
             name: "GraphiteQuickDraw",
-            dependencies: ["GraphiteBase"]
-        ),
-        .systemLibrary(
-            name: "CFreeType",
-            pkgConfig: "freetype2",
-            providers: [.apt(["libfreetype-dev"]), .brew(["freetype"])]
+            dependencies: ["GraphiteBase", "GraphiteFiles", "GraphiteResources"]
         ),
         .target(
             name: "GraphiteText",
             dependencies: [
                 "GraphiteBase", "GraphiteQuickDraw",
-                .target(name: "CFreeType", condition: .when(traits: ["FreeType"])),
+                .product(name: "FreeTypeSwift", package: "swift-freetype", condition: .when(traits: ["FreeType"])),
             ]
         ),
         .target(
@@ -143,7 +139,7 @@ let package = Package(
         ),
         .testTarget(
             name: "GraphiteQuickDrawTests",
-            dependencies: ["GraphiteQuickDraw"]
+            dependencies: ["GraphiteQuickDraw", "GraphiteFiles", "GraphiteResources"]
         ),
         .testTarget(
             name: "GraphiteTextTests",

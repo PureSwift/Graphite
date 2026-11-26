@@ -2,6 +2,7 @@
 // that many Pascal strings, and a single Pascal string. GetIndString reads
 // the first.
 
+import protocol Foundation.ContiguousBytes
 import GraphiteBase
 
 /// A 'STR#' resource.
@@ -16,7 +17,7 @@ public struct StringList: Hashable, Sendable {
     }
 
     /// mapReadErr if the bytes end before the strings their count says.
-    public init(bytes: [UInt8]) throws(MacError) {
+    public init(bytes: some ContiguousBytes) throws(MacError) {
         var reader = BigEndianReader(bytes)
         do {
             let count = Int(try reader.read(UInt16.self))
@@ -57,8 +58,8 @@ public struct StringResource: Hashable, Sendable {
 
     /// A length longer than the bytes takes what there is, as GetString's
     /// callers found.
-    public init(bytes: [UInt8]) {
-        string = PascalString(lengthPrefixed: bytes)
+    public init(bytes: some ContiguousBytes) {
+        string = PascalString(lengthPrefixed: Array(copying: bytes))
     }
 
     public var bytes: [UInt8] { string.lengthPrefixed }
