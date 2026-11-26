@@ -168,6 +168,67 @@ public struct TextLayout {
         return line.range.upperBound
     }
 
+    // MARK: Glyphs
+
+    /// A character's glyph, as an entry of ATSUI's layout data.
+    public struct GlyphRecord: Hashable, Sendable {
+        /// The glyph's number in its run's face; 0 for one the face hasn't.
+        public var glyphID: UInt16
+        /// The character's offset in the text.
+        public var offset: Int
+        /// The glyph's left edge from the layout's left.
+        public var x: Double
+        /// The index of the line the glyph is on.
+        public var line: Int
+    }
+
+    /// The run a character is in: the last to cover it, else the first.
+    private func run(at offset: Int) -> TextRun {
+        runs.last { $0.range.contains(offset) } ?? runs.first ?? TextRun(range: 0 ..< scalars.count)
+    }
+
+    private func face(for run: TextRun) -> any FontFace {
+        fonts.face(family: run.family, style: run.style)
+    }
+
+    /// The glyphs of the characters in a range (all of them without one), in
+    /// the order of the lines, each in its run's face. Line breaks draw
+    /// nothing and have none. A range past the text is clipped to it.
+    public func glyphRecords(in range: Range<Int>? = nil) -> [GlyphRecord] {
+        var records: [GlyphRecord] = []
+        for (index, line) in lines.enumerated() {
+            for character in line.characters where range?.contains(character.offset) ?? true {
+                let scalar = scalars[character.offset]
+                if scalar == "\n" || scalar == "\r" { continue }
+                records.append(GlyphRecord(glyphID: face(for: run(at: character.offset)).glyphID(for: scalar),
+                                           offset: character.offset, x: character.x, line: index))
+            }
+        }
+        return records
+    }
+
+    /// ATSUMeasureTextImage: the box the ink of the characters in a range
+    /// fills (all of them without one), in whole pixels from the layout's
+    /// top left; nil if they draw nothing. Each glyph's ink is its face's
+    /// plain glyph, so synthesized styles are not in it.
+    public func inkBounds(of range: Range<Int>? = nil) -> Rect? {
+        var box: (top: Int, left: Int, bottom: Int, right: Int)?
+        for line in lines {
+            for character in line.characters where range?.contains(character.offset) ?? true {
+                let run = run(at: character.offset)
+                guard let metrics = face(for: run).glyphMetrics(for: scalars[character.offset], size: run.size), metrics.hasInk else { continue }
+                let ink = metrics.inkBox
+                let left = Int(character.x.rounded(.down)) + ink.left
+                let top = line.baseline - ink.top
+                let glyph = (top: top, left: left, bottom: top + ink.height, right: left + ink.width)
+                box = box.map { (min($0.top, glyph.top), min($0.left, glyph.left), max($0.bottom, glyph.bottom), max($0.right, glyph.right)) } ?? glyph
+            }
+        }
+        return box.map {
+            Rect(top: Int16(clamping: $0.top), left: Int16(clamping: $0.left), bottom: Int16(clamping: $0.bottom), right: Int16(clamping: $0.right))
+        }
+    }
+
     // MARK: Drawing
 
     /// ATSUDrawText: the layout with its top left at a point of the port,
