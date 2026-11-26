@@ -193,6 +193,8 @@ extension MacError: CustomStringConvertible {
             -201: "notEnoughHardwareErr", -203: "queueFull", -204: "resProblem", -205: "badChannel",
             -206: "badFormat", -207: "notEnoughBufferSpace", -208: "badFileFormat", -209: "channelBusy",
             -210: "buffersTooSmall", -223: "siInvalidCompression",
+            -5603: "menuPropertyInvalidErr", -5604: "menuPropertyNotFoundErr", -5620: "menuNotFoundErr",
+            -5621: "menuUsesSystemDefErr", -5622: "menuItemNotFoundErr", -5623: "menuInvalidErr",
         ]
         guard let name = names[code] else { return "\(code)" }
         return "\(name) (\(code))"
@@ -224,4 +226,22 @@ public extension MacError {
     /// siInvalidCompression: the compression type isn't one the sound
     /// manager has.
     static var invalidCompression: MacError { MacError(-223) }
+}
+
+// MARK: - Menu Manager
+
+public extension MacError {
+
+    /// menuPropertyInvalidErr: an invalid property creator.
+    static var menuPropertyInvalid: MacError { MacError(-5603) }
+    /// menuPropertyNotFoundErr: the property wasn't found.
+    static var menuPropertyNotFound: MacError { MacError(-5604) }
+    /// menuNotFoundErr: no menu of the ID, or none open to track.
+    static var menuNotFound: MacError { MacError(-5620) }
+    /// menuUsesSystemDefErr: the menu's definition can't be had.
+    static var menuUsesSystemDefinition: MacError { MacError(-5621) }
+    /// menuItemNotFoundErr: no item of the index or ID.
+    static var menuItemNotFound: MacError { MacError(-5622) }
+    /// menuInvalidErr: the menu or its resource is invalid.
+    static var menuInvalid: MacError { MacError(-5623) }
 }
