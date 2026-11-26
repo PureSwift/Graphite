@@ -1,6 +1,6 @@
-// The Toolbox's result codes, as an error Graphite throws. Perry turns it
-// back into the OSErr or OSStatus its caller expects, and into ResError,
-// MemError and QDError.
+// The Toolbox's result codes, as an error Graphite throws. The layer that
+// exports Carbon turns it back into the OSErr or OSStatus its caller
+// expects, and into ResError, MemError and QDError.
 
 /// A Mac OS result code. Zero, noErr, is success; Graphite throws only the
 /// others.
