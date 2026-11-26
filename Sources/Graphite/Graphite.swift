@@ -12,3 +12,4 @@
 @_exported import GraphiteWindows
 @_exported import GraphiteMenus
 @_exported import GraphiteControls
+@_exported import GraphiteDialogs
