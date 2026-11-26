@@ -27,9 +27,9 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 
 > **Status:** early development. `GraphiteBase`, `GraphiteTasks`,
 > `GraphiteFiles`, `GraphiteResources`, `GraphiteAppleEvents`,
-> `GraphiteQuickDraw`, `GraphiteText` and `GraphiteSound` are in place, apart
-> from the MACE codecs and double-buffered sound. The Toolbox's windows, menus,
-> controls and dialogs come next.
+> `GraphiteQuickDraw`, `GraphiteText`, `GraphiteSound` and `GraphiteWindows`
+> are in place, apart from the MACE codecs and double-buffered sound. The
+> Toolbox's menus, controls and dialogs come next.
 
 ## Modules
 
@@ -43,6 +43,7 @@ Any UI it shows will be drawn with [Cacao](https://github.com/PureSwift/Cacao).
 | `GraphiteQuickDraw` | QuickDraw's pixels (1 to 8 bits indexed, 16 and 32 bits direct, big-endian on every CPU, in memory of its own or a program's), colors and the system's color tables, regions as real regions with QuickDraw's region records, patterns, transfer modes, ports, devices and offscreen worlds; drawing rectangles, ovals, round rectangles, arcs, polygons, regions and lines with the pen, and CopyBits, CopyMask and ScrollRect between any depths; PICT pictures, version 1 and 2, with PackBits and QuickTime-compressed images through a decoder the host gives. |
 | `GraphiteText` | Fonts: faces and their metrics, the Font Manager's family numbers and names with the classic fonts' and their substitutes, a built-in bitmap system font (from Pomme), and QuickDraw's text in a port's font, face, size and mode, with the styles a face hasn't drawn from its plain glyphs; ATSUI-style layouts with styled runs, line breaking, measuring, hit testing and drawing, and the text in PICT pictures; and, with the `FreeType` trait (on by default), faces from TrueType, OpenType and other outline fonts, found by family name in the system's font folders. |
 | `GraphiteSound` | The Sound Manager: sampled sounds from `'snd '` resources (formats 1 and 2, with the standard, compressed and extended headers) and AIFF and AIFF-C files, read to 16-bit PCM; the µ-law, A-law and IMA4 codecs (MACE is recognized but not decoded yet); sound channels with queued commands (`SndDoCommand`) including `callBackCmd`, `waitCmd` and `syncCmd`, immediate ones, volume, pan, pitch, loops and completion; a mixer that renders them to stereo float frames, for an audio device the host provides; and the frequencies of MIDI notes. |
+| `GraphiteWindows` | The Window Manager: windows of every class, from documents, dialogs and alerts to palettes, sheets and drawers, each with the standard Mac OS 8 and 9 frame or a window definition the host brings (the WDEF); the window list ordered by layer, `FrontWindow`, and the active document and the active palette; `FindWindow` and every part of a frame; showing, hiding, selecting, zooming between the user and standard states, collapsing; `MoveWindow`, `SizeWindow` and `SetWindowBounds`, with centering, cascading and the alert position; each window's content in an offscreen buffer with its visible region — what no window in front covers — its update region with `BeginUpdate` and `EndUpdate`, and the part of it the host is told to flush. |
 | `Graphite` | Re-exports the modules above. |
 
 Everything depends only on the Swift standard library, the C library

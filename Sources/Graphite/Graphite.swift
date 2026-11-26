@@ -9,3 +9,4 @@
 @_exported import GraphiteQuickDraw
 @_exported import GraphiteText
 @_exported import GraphiteSound
+@_exported import GraphiteWindows
