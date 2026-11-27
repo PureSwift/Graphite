@@ -15,6 +15,7 @@ public final class ToolboxScene: HostScene {
     public let window: Window
     public var onItemHit: (Int) -> Void
     public var onDetach: () -> Void
+    public var drawsWindowFrame = false
     /// When set, translated input is posted here for the application to dispatch.
     public var eventQueue: EventQueue?
     /// Called after an event is queued so a host can dispatch it promptly.
@@ -39,7 +40,23 @@ public final class ToolboxScene: HostScene {
     /// Notify the scene after application code modifies its dialog or pixels.
     public func invalidate() { dirty = true }
 
-    public func handle(_ event: HostEvent, time: Double) {
+    private var frameOffset: CGPoint {
+        guard drawsWindowFrame else { return .zero }
+        return CGPoint(x: Int(window.contentBounds.left) - Int(window.structureBounds.left),
+                       y: Int(window.contentBounds.top) - Int(window.structureBounds.top))
+    }
+
+    public func hitTest(at point: CGPoint) -> HostHitTestResult {
+        guard drawsWindowFrame else { return .normal }
+        return point.y < frameOffset.y ? .draggable : .normal
+    }
+
+    public func handle(_ input: HostEvent, time: Double) {
+        let event: HostEvent
+        if case .pointer(let phase, let button, let position, let isFromTouch) = input, drawsWindowFrame {
+            let offset = frameOffset
+            event = .pointer(phase, button: button, at: CGPoint(x: position.x - offset.x, y: position.y - offset.y), isFromTouch: isFromTouch)
+        } else { event = input }
         if let eventQueue, let translated = HostEventTranslator().translate(event, window: window, time: time) {
             eventQueue.post(translated)
             didPostEvent?()
@@ -97,8 +114,10 @@ public final class ToolboxScene: HostScene {
         if frame.size.width.isFinite, frame.size.height.isFinite,
            frame.size.width >= 1, frame.size.height >= 1,
            frame.size.width <= CGFloat(Int16.max), frame.size.height <= CGFloat(Int16.max) {
-            let width = Int16(frame.size.width.rounded(.towardZero))
-            let height = Int16(frame.size.height.rounded(.towardZero))
+            let extraWidth = drawsWindowFrame ? window.structureBounds.width - window.contentBounds.width : 0
+            let extraHeight = drawsWindowFrame ? window.structureBounds.height - window.contentBounds.height : 0
+            let width = Int16(max(1, Int(frame.size.width) - extraWidth))
+            let height = Int16(max(1, Int(frame.size.height) - extraHeight))
             let bounds = window.uncollapsedContentBounds
             if bounds.width != Int(width) || bounds.height != Int(height) {
                 window.size(width: width, height: height)
@@ -111,7 +130,10 @@ public final class ToolboxScene: HostScene {
         return changed
     }
 
-    public func displayList() -> DisplayList { renderer.render(window: window, dialog: dialog, version: revision) }
+    public func displayList() -> DisplayList {
+        drawsWindowFrame ? renderer.renderFrame(window: window, dialog: dialog, version: revision)
+                         : renderer.render(window: window, dialog: dialog, version: revision)
+    }
     public func detach() {
         dialog.hide()
         onDetach()
