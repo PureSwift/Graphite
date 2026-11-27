@@ -3,6 +3,8 @@ import Foundation
 import CacaoHost
 import GraphiteBase
 import GraphiteDialogs
+import GraphiteControls
+import GraphiteCacaoRenderer
 import GraphiteEvents
 import GraphiteQuickDraw
 import GraphiteWindows
@@ -45,4 +47,19 @@ import GraphiteWindows
     var point = BigEndianWriter()
     point.write(Float(80).bitPattern); point.write(Float(70).bitPattern)
     #expect(pointer.parameter("mloc", type: "hipt")?.bytes == point.bytes)
+}
+
+@MainActor
+@Test func rendererShowsCheckBoxState() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let window = try manager.newWindow(bounds: Rect(top: 50, left: 50, bottom: 150, right: 250))
+    let control = Control(kind: .checkBox, bounds: Rect(top: 10, left: 10, bottom: 30, right: 100), title: "Option")
+    control.maximum = 1
+    let renderer = ToolboxRenderer()
+    let unchecked = renderer.render(window: window, controls: [control])
+    control.value = 1
+    let checked = renderer.render(window: window, controls: [control])
+    #expect(checked.items.count > unchecked.items.count)
+    control.hide()
+    #expect(renderer.render(window: window, controls: [control]).items.count == 1)
 }
