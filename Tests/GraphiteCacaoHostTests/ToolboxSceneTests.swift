@@ -241,3 +241,22 @@ private struct TestTextMeasurement: TextMeasurementService {
     scene.handle(.text("X"), time: 2)
     #expect(dialog.text(of: 1)?.bytes == Array("abXc".utf8))
 }
+
+@MainActor
+@Test func draggingSelectsText() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 70, bottom: 150, right: 270), items: [
+        DialogItem(bounds: Rect(top: 10, left: 10, bottom: 30, right: 100), kind: .editText, text: "abcd")
+    ])
+    try dialog.attach(to: manager)
+    let scene = try #require(ToolboxScene(dialog: dialog, onItemHit: { _ in }))
+    scene.textMeasurement = TestTextMeasurement()
+    let dispatcher = ToolboxEventDispatcher(windows: manager, itemHit: { _, _ in })
+    dispatcher.attach(scene)
+    scene.handle(.pointer(.began, button: .primary, at: CGPoint(x: 15, y: 15), isFromTouch: false), time: 1)
+    scene.handle(.pointer(.moved, button: .primary, at: CGPoint(x: 25, y: 15), isFromTouch: false), time: 2)
+    scene.handle(.pointer(.ended, button: .primary, at: CGPoint(x: 25, y: 15), isFromTouch: false), time: 3)
+    #expect(dialog.selectedText[1] == 1..<3)
+    scene.handle(.text("X"), time: 4)
+    #expect(dialog.text(of: 1)?.bytes == Array("aXd".utf8))
+}
