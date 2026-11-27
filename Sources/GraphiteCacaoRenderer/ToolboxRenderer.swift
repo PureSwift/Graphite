@@ -10,6 +10,35 @@ import GraphiteDialogs
 public struct ToolboxRenderer {
     public init() {}
 
+    /// Builds a structure-coordinate display list, including a simple frame
+    /// and title bar around the content. Hosts using system decorations can
+    /// continue to use `render(window:controls:dialog:version:)`.
+    public func renderFrame(window: Window, controls: [Control] = [], dialog: Dialog? = nil, version: Int = 0) -> DisplayList {
+        let structure = window.structureBounds
+        let content = window.contentBounds
+        let width = CGFloat(structure.width), height = CGFloat(structure.height)
+        let offsetX = CGFloat(Int(content.left) - Int(structure.left))
+        let offsetY = CGFloat(Int(content.top) - Int(structure.top))
+        let edge = ResolvedColor(red: 0.2, green: 0.2, blue: 0.2)
+        let titleColor = ResolvedColor(red: 0.87, green: 0.87, blue: 0.87)
+        var items: [DisplayList.Item] = []
+        func add(_ frame: CGRect, _ content: DisplayList.Content) {
+            items.append(.init(frame: frame, identity: items.count, version: version, value: .content(content)))
+        }
+        add(CGRect(x: 0, y: 0, width: width, height: height), .color(edge))
+        if offsetY > 0 {
+            add(CGRect(x: 1, y: 1, width: max(0, width - 2), height: max(0, offsetY - 1)), .color(titleColor))
+            let run = ResolvedText.Run(string: MacRoman.decode(window.title.bytes), font: ResolvedFont(size: 12), color: edge)
+            add(CGRect(x: max(4, offsetX + 4), y: 2, width: max(0, width - 16), height: max(0, offsetY - 3)), .text(ResolvedText(runs: [run], alignment: .center)))
+        }
+        for var item in render(window: window, controls: controls, dialog: dialog, version: version).items {
+            item.frame = item.frame.offsetBy(dx: offsetX, dy: offsetY)
+            item.identity = items.count
+            items.append(item)
+        }
+        return DisplayList(items: items)
+    }
+
     public func render(window: Window, controls: [Control] = [], dialog: Dialog? = nil, version: Int = 0) -> DisplayList {
         var items: [DisplayList.Item] = []
         func add(_ rect: CGRect, _ content: DisplayList.Content) {
