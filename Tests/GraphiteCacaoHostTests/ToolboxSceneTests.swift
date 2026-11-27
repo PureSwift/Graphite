@@ -95,3 +95,21 @@ import GraphiteWindows
     #expect(scene.window.contentBounds.height == 120)
     #expect(!scene.update(HostFrame(time: 1, size: CGSize(width: 220, height: 120), scale: 1)))
 }
+
+@MainActor
+@Test func cancellingPointerDoesNotSelectControl() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 70, bottom: 150, right: 270), items: [
+        DialogItem(bounds: Rect(top: 10, left: 10, bottom: 30, right: 80), kind: .button, text: "OK")
+    ])
+    try dialog.attach(to: manager)
+    var hits: [Int] = []
+    let scene = try #require(ToolboxScene(dialog: dialog, onItemHit: { _ in }))
+    let dispatcher = ToolboxEventDispatcher(windows: manager, itemHit: { _, item in hits.append(item) })
+    dispatcher.attach(scene)
+    let point = CGPoint(x: 20, y: 20)
+    scene.handle(.pointer(.began, button: .primary, at: point, isFromTouch: false), time: 1)
+    scene.handle(.pointer(.cancelled, button: .primary, at: point, isFromTouch: false), time: 2)
+    scene.handle(.pointer(.ended, button: .primary, at: point, isFromTouch: false), time: 3)
+    #expect(hits.isEmpty)
+}
