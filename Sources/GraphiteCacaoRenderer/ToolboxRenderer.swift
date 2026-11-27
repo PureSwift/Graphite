@@ -128,14 +128,25 @@ public struct ToolboxRenderer {
                 text(control.title, in: CGRect(x: mark.maxX + 4, y: bounds.minY, width: max(0, bounds.maxX - mark.maxX - 4), height: bounds.height), enabled: enabled)
             case .scrollBar:
                 add(bounds, .color(gray))
-                let vertical = bounds.height >= bounds.width
-                let span = vertical ? bounds.height : bounds.width
-                let thumb = min(span, max(8, vertical ? bounds.width : bounds.height))
-                let range = max(0, Double(control.maximum) - Double(control.minimum))
-                let fraction = range == 0 ? 0 : max(0, min(1, (Double(control.value) - Double(control.minimum)) / range))
-                let offset = (span - thumb) * fraction
-                let thumbRect = vertical ? CGRect(x: bounds.minX, y: bounds.minY + offset, width: bounds.width, height: thumb) : CGRect(x: bounds.minX + offset, y: bounds.minY, width: thumb, height: bounds.height)
-                add(thumbRect.insetBy(dx: 1, dy: 1), .color(edge))
+                func partRect(_ part: ControlPart) -> CGRect? {
+                    control.definition.rect(of: part, bounds: control.bounds, kind: .scrollBar,
+                                            value: control.value, minimum: control.minimum,
+                                            maximum: control.maximum).map(frame)
+                }
+                if let thumb = partRect(.thumb), !thumb.isEmpty {
+                    add(thumb, .color(edge))
+                    let inner = thumb.insetBy(dx: 1, dy: 1)
+                    if !inner.isEmpty { add(inner, .color(control.hilitedPart == .thumb ? gray : white)) }
+                }
+                for part in [ControlPart.upButton, .downButton] {
+                    guard let arrow = partRect(part), !arrow.isEmpty else { continue }
+                    add(arrow, .color(edge))
+                    let inner = arrow.insetBy(dx: 1, dy: 1)
+                    if !inner.isEmpty { add(inner, .color(control.hilitedPart == part ? gray : white)) }
+                    let vertical = bounds.height >= bounds.width
+                    let label: PascalString = vertical ? (part == .upButton ? "^" : "v") : (part == .upButton ? "<" : ">")
+                    text(label, in: inner, enabled: enabled, alignment: .center)
+                }
             default:
                 if let dialog, dialog.defaultItem > 0,
                    dialog.control(of: dialog.defaultItem) === control, enabled {
