@@ -11,6 +11,9 @@ public struct HostEventTranslator {
     public func translate(_ event: HostEvent, window: Window, time: Double) -> CarbonEvent? {
         switch event {
         case .pointer(let phase, button: .primary, at: let position, isFromTouch: _):
+            if phase == .cancelled {
+                return CarbonEvent(type: EventType(eventClass: "gdlg", kind: 1), time: time)
+            }
             let origin = window.contentBounds
             let x = Double(position.x) + Double(origin.left)
             let y = Double(position.y) + Double(origin.top)
