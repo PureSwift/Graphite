@@ -139,3 +139,22 @@ import GraphiteWindows
     #expect(last.frame.minY == CGFloat(Int(window.contentBounds.top) - Int(window.structureBounds.top)))
     #expect(list.items.count >= 3)
 }
+
+@MainActor
+@Test func framedSceneOffsetsPointerInput() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 70, bottom: 150, right: 270), items: [
+        DialogItem(bounds: Rect(top: 10, left: 10, bottom: 30, right: 80), kind: .button, text: "OK")
+    ])
+    try dialog.attach(to: manager)
+    var hits: [Int] = []
+    let scene = try #require(ToolboxScene(dialog: dialog, onItemHit: { hits.append($0) }))
+    scene.drawsWindowFrame = true
+    let bounds = scene.window.contentBounds
+    let structure = scene.window.structureBounds
+    let point = CGPoint(x: 20 + Int(bounds.left) - Int(structure.left), y: 20 + Int(bounds.top) - Int(structure.top))
+    scene.handle(.pointer(.began, button: .primary, at: point, isFromTouch: false), time: 1)
+    scene.handle(.pointer(.ended, button: .primary, at: point, isFromTouch: false), time: 2)
+    #expect(hits == [1])
+    #expect(scene.hitTest(at: CGPoint(x: 30, y: 3)) == .draggable)
+}
