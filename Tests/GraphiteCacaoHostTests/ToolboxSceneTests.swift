@@ -158,3 +158,16 @@ import GraphiteWindows
     #expect(hits == [1])
     #expect(scene.hitTest(at: CGPoint(x: 30, y: 3)) == .draggable)
 }
+
+@MainActor
+@Test func framedSceneSizePreservesContentDimensions() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 70, bottom: 150, right: 270))
+    try dialog.attach(to: manager)
+    let scene = try #require(ToolboxScene(dialog: dialog, onItemHit: { _ in }))
+    scene.drawsWindowFrame = true
+    let structure = scene.window.structureBounds
+    #expect(scene.update(HostFrame(time: 0, size: CGSize(width: structure.width, height: structure.height), scale: 1)))
+    #expect(scene.window.contentBounds.width == 200)
+    #expect(scene.window.contentBounds.height == 100)
+}
