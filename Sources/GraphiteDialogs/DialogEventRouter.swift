@@ -43,6 +43,20 @@ public final class DialogEventRouter {
         redraw(dialog)
     }
 
+    /// Install dialog dispatch into an application event target. The caller
+    /// owns the registration and can remove it using the returned identifier.
+    @discardableResult
+    public func install(on target: EventTarget) -> UInt64 {
+        let types: Set<EventType> = [
+            EventType(eventClass: "mous", kind: 1), EventType(eventClass: "mous", kind: 2),
+            EventType(eventClass: "mous", kind: 5), EventType(eventClass: "keyb", kind: 1),
+            EventType(eventClass: "keyb", kind: 2), EventType(eventClass: "text", kind: 1)
+        ]
+        return target.install(types: types) { [weak self] event, _ in
+            self?.route(event) == true ? .handled : .notHandled
+        }
+    }
+
     /// Route mouse and key EventRecords; other events remain unconsumed.
     @discardableResult
     public func route(_ event: ClassicEvent) -> Bool {
