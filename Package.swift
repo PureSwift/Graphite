@@ -106,7 +106,7 @@ let package = Package(
         .default(enabledTraits: ["FreeType"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/PureSwift/Cacao.git", revision: "054f72f786a4c2529540b11bd896eb7a222c2227"),
+        .package(url: "https://github.com/PureSwift/Cacao.git", revision: "8d8901bb73dfca2e59ce536c103f562544aaa6a2"),
         .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0"),
         .package(url: "https://github.com/PureSwift/swift-freetype.git", from: "0.1.1"),
     ],
