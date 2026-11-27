@@ -72,6 +72,10 @@ public struct ToolboxRenderer {
                 if item.kind == .staticText || item.kind == .editText {
                     let bounds = frame(item.bounds)
                     if item.kind == .editText {
+                        if dialog.keyboardFocus == index + 1 && item.isEnabled {
+                            let focus = ResolvedColor(red: 0.2, green: 0.45, blue: 0.8)
+                            add(bounds.insetBy(dx: -2, dy: -2), .color(focus))
+                        }
                         add(bounds, .color(item.isEnabled ? black : gray))
                         let inner = bounds.insetBy(dx: 1, dy: 1)
                         if inner.width > 0 && inner.height > 0 { add(inner, .color(white)) }
