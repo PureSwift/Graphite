@@ -182,3 +182,18 @@ import GraphiteWindows
     #expect(!scene.update(HostFrame(time: 1, size: CGSize(width: 32767, height: 100), scale: 1)))
     #expect(scene.window.contentBounds.width == 200)
 }
+
+@MainActor
+@Test func rendererMarksFocusedTextItem() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 50, bottom: 150, right: 250), items: [
+        DialogItem(bounds: Rect(top: 10, left: 10, bottom: 30, right: 100), kind: .editText),
+        DialogItem(bounds: Rect(top: 40, left: 10, bottom: 60, right: 100), kind: .editText)
+    ])
+    try dialog.attach(to: manager)
+    let window = try #require(dialog.window)
+    let first = ToolboxRenderer().render(window: window, dialog: dialog)
+    dialog.focusTextItem(2)
+    let second = ToolboxRenderer().render(window: window, dialog: dialog)
+    #expect(first.items.map(\.frame) != second.items.map(\.frame))
+}
