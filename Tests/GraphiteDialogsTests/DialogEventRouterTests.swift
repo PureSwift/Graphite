@@ -44,4 +44,24 @@ import GraphiteWindows
         #expect(router.route(event(2)))
         #expect(hits == 1)
     }
+    @Test func carbonTextAndDefaultKey() throws {
+        let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+        let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 50, bottom: 150, right: 250),
+                            items: [DialogItem(bounds: Rect(top: 10, left: 10, bottom: 30, right: 100), kind: .editText),
+                                    DialogItem(bounds: Rect(top: 40, left: 10, bottom: 60, right: 80), kind: .button)])
+        dialog.defaultItem = 2
+        try dialog.attach(to: manager)
+        var hits: [Int] = []
+        let router = DialogEventRouter(windows: manager, itemHit: { _, hit in hits.append(hit) })
+        router.register(dialog)
+        var text = CarbonEvent(type: EventType(eventClass: "text", kind: 1), time: 0)
+        text.setParameter("text", type: "TEXT", bytes: [65, 66])
+        #expect(router.route(text))
+        #expect(dialog.text(of: 1)?.bytes == [65, 66])
+        var key = CarbonEvent(type: EventType(eventClass: "keyb", kind: 1), time: 0)
+        key.setParameter("kchr", type: "char", bytes: [13])
+        #expect(router.route(key))
+        #expect(hits == [2])
+    }
+
 }
