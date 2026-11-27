@@ -128,3 +128,14 @@ import GraphiteWindows
     let marked = renderer.render(window: window, dialog: dialog)
     #expect(marked.items.count == plain.items.count + 2)
 }
+
+@MainActor
+@Test func rendererPlacesContentInsideWindowFrame() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let window = try manager.newWindow(bounds: Rect(top: 50, left: 70, bottom: 150, right: 270), title: "Document")
+    let list = ToolboxRenderer().renderFrame(window: window)
+    let last = try #require(list.items.last)
+    #expect(last.frame.minX == CGFloat(Int(window.contentBounds.left) - Int(window.structureBounds.left)))
+    #expect(last.frame.minY == CGFloat(Int(window.contentBounds.top) - Int(window.structureBounds.top)))
+    #expect(list.items.count >= 3)
+}
