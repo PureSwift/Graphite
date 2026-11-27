@@ -38,7 +38,7 @@ struct GraphiteDialogDemo {
         })
         guard let scene = ToolboxScene(dialog: dialog, onItemHit: { _ in }) else { return }
         HostRuntime.run {
-            if ToolboxWindowHost.present(scene, dispatcher: dispatcher) == nil {
+            if ToolboxWindowHost.present(scene, dispatcher: dispatcher, graphiteFrame: CommandLine.arguments.contains("--graphite-frame")) == nil {
                 print("Could not open the demo window.")
             }
         }
