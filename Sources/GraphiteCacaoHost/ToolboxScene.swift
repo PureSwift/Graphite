@@ -71,6 +71,9 @@ public final class ToolboxScene: HostScene {
             if key.modifiers.contains(.option) { modifiers |= 0x0800 }
             if key.modifiers.contains(.control) { modifiers |= 0x1000 }
             translated = .key(characters: PascalString(bytes: [byte]), modifiers: modifiers)
+        case .geometryChanged, .windowStateChanged, .appearanceChanged:
+            invalidate()
+            return
         default: translated = nil
         }
         guard let translated else { return }
@@ -88,5 +91,8 @@ public final class ToolboxScene: HostScene {
     }
 
     public func displayList() -> DisplayList { renderer.render(window: window, dialog: dialog, version: revision) }
-    public func detach() { onDetach() }
+    public func detach() {
+        dialog.hide()
+        onDetach()
+    }
 }
