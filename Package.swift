@@ -43,6 +43,7 @@ let package = Package(
         .macOS(.v15)
     ],
     products: [
+        .executable(name: "GraphiteDialogDemo", targets: ["GraphiteDialogDemo"]),
         .library(
             name: "Graphite",
             targets: ["Graphite"]
@@ -110,6 +111,7 @@ let package = Package(
         .package(url: "https://github.com/PureSwift/swift-freetype.git", from: "0.1.1"),
     ],
     targets: [
+        .executableTarget(name: "GraphiteDialogDemo", dependencies: ["GraphiteBase", "GraphiteQuickDraw", "GraphiteWindows", "GraphiteDialogs", "GraphiteCacaoHost", .product(name: "CacaoHost", package: "Cacao")], path: "Examples/GraphiteDialogDemo"),
         .target(
             name: "GraphiteBase"
         ),
