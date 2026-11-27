@@ -49,10 +49,39 @@ public struct ToolboxRenderer {
         }
         for control in (dialog.map { $0.controlList.controls } ?? controls).reversed() where control.isVisible {
             let bounds = frame(control.bounds)
-            add(bounds, .color(control.hilitedPart == .none ? gray : black))
-            let inset = bounds.insetBy(dx: 1, dy: 1)
-            if inset.width > 0 && inset.height > 0 { add(inset, .color(white)) }
-            text(control.title, in: inset, enabled: control.isEnabled && control.isActive)
+            let enabled = control.isEnabled && control.isActive
+            let edge = enabled ? black : gray
+            let pressed = control.hilitedPart != .none
+            switch control.kind {
+            case .checkBox, .radioButton:
+                let size = min(bounds.height, 14)
+                let mark = CGRect(x: bounds.minX, y: bounds.minY + (bounds.height - size) / 2, width: size, height: size)
+                if control.kind == .radioButton {
+                    add(mark, .roundedRectangle(.init(color: edge, cornerRadius: size / 2)))
+                    add(mark.insetBy(dx: 1, dy: 1), .roundedRectangle(.init(color: white, cornerRadius: max(0, size / 2 - 1))))
+                    if control.value != 0 { add(mark.insetBy(dx: 4, dy: 4), .roundedRectangle(.init(color: edge, cornerRadius: size / 2))) }
+                } else {
+                    add(mark, .color(edge))
+                    add(mark.insetBy(dx: 1, dy: 1), .color(white))
+                    if control.value != 0 { text("X", in: mark, enabled: enabled) }
+                }
+                text(control.title, in: CGRect(x: mark.maxX + 4, y: bounds.minY, width: max(0, bounds.maxX - mark.maxX - 4), height: bounds.height), enabled: enabled)
+            case .scrollBar:
+                add(bounds, .color(gray))
+                let vertical = bounds.height >= bounds.width
+                let span = vertical ? bounds.height : bounds.width
+                let thumb = min(span, max(8, vertical ? bounds.width : bounds.height))
+                let range = max(0, Double(control.maximum) - Double(control.minimum))
+                let fraction = range == 0 ? 0 : max(0, min(1, (Double(control.value) - Double(control.minimum)) / range))
+                let offset = (span - thumb) * fraction
+                let thumbRect = vertical ? CGRect(x: bounds.minX, y: bounds.minY + offset, width: bounds.width, height: thumb) : CGRect(x: bounds.minX + offset, y: bounds.minY, width: thumb, height: bounds.height)
+                add(thumbRect.insetBy(dx: 1, dy: 1), .color(edge))
+            default:
+                add(bounds, .roundedRectangle(.init(color: edge, cornerRadius: 4)))
+                let inset = bounds.insetBy(dx: 1, dy: 1)
+                if inset.width > 0 && inset.height > 0 { add(inset, .roundedRectangle(.init(color: pressed ? gray : white, cornerRadius: 3))) }
+                text(control.title, in: inset, enabled: enabled)
+            }
         }
         return DisplayList(items: items)
     }
