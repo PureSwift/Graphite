@@ -61,6 +61,7 @@ public final class ToolboxScene: HostScene {
         if let eventQueue, let translated = HostEventTranslator().translate(event, window: window, time: time) {
             eventQueue.post(translated)
             didPostEvent?()
+            positionCaret(for: event)
             return
         }
         let translated: DialogEvent?
@@ -108,6 +109,28 @@ public final class ToolboxScene: HostScene {
         var item = 0
         if StandardDialogFilter().filter(dialog, translated, &item) { onItemHit(item) }
         else if let item = dialog.handle(translated) { onItemHit(item) }
+        positionCaret(for: event)
+        dirty = true
+    }
+
+    private func positionCaret(for event: HostEvent) {
+        guard case .pointer(.began, button: .primary, at: let point, isFromTouch: _) = event,
+              point.x.isFinite, point.y.isFinite,
+              point.x >= CGFloat(Int16.min), point.x <= CGFloat(Int16.max),
+              point.y >= CGFloat(Int16.min), point.y <= CGFloat(Int16.max),
+              let measurement = textMeasurement,
+              let index = dialog.findItem(at: Point(v: Int16(point.y), h: Int16(point.x))),
+              let item = dialog.item(index + 1), item.kind == .editText, item.isEnabled,
+              dialog.keyboardFocus == index + 1 else { return }
+        let bounds = item.bounds
+        let run = ResolvedText.Run(string: MacRoman.decode(item.text.bytes), font: ResolvedFont(size: 12),
+                                   color: ResolvedColor(red: 0, green: 0, blue: 0))
+        let geometry = measurement.measure(ResolvedText(runs: [run]),
+                                           in: ProposedViewSize(CGSize(width: bounds.width, height: bounds.height)))
+        guard let scalarOffset = geometry.offset(nearest: CGPoint(x: point.x - CGFloat(bounds.left), y: point.y - CGFloat(bounds.top))) else { return }
+        let bytes = item.text.bytes
+        let byteOffset = (0...bytes.count).first { MacRoman.decode(bytes.prefix($0)).unicodeScalars.count >= scalarOffset } ?? bytes.count
+        dialog.selectText(of: index + 1, range: byteOffset..<byteOffset)
         dirty = true
     }
 
