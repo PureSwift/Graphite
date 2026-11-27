@@ -113,3 +113,18 @@ import GraphiteWindows
     scene.handle(.pointer(.ended, button: .primary, at: point, isFromTouch: false), time: 3)
     #expect(hits.isEmpty)
 }
+
+@MainActor
+@Test func rendererMarksDefaultButton() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 50, bottom: 150, right: 250), items: [
+        DialogItem(bounds: Rect(top: 40, left: 10, bottom: 60, right: 80), kind: .button, text: "OK")
+    ])
+    try dialog.attach(to: manager)
+    let window = try #require(dialog.window)
+    let renderer = ToolboxRenderer()
+    let plain = renderer.render(window: window, dialog: dialog)
+    dialog.defaultItem = 1
+    let marked = renderer.render(window: window, dialog: dialog)
+    #expect(marked.items.count == plain.items.count + 2)
+}
