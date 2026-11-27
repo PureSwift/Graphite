@@ -7,8 +7,10 @@ import GraphiteControls
 import GraphiteDialogs
 
 /// Builds a Cacao display list in window-content coordinates for a host to present.
+@MainActor
 public struct ToolboxRenderer {
-    public init() {}
+    public var textMeasurement: (any TextMeasurementService)?
+    public init(textMeasurement: (any TextMeasurementService)? = nil) { self.textMeasurement = textMeasurement }
 
     /// Builds a structure-coordinate display list, including a simple frame
     /// and title bar around the content. Hosts using system decorations can
@@ -80,7 +82,28 @@ public struct ToolboxRenderer {
                         let inner = bounds.insetBy(dx: 1, dy: 1)
                         if inner.width > 0 && inner.height > 0 { add(inner, .color(white)) }
                     }
-                    if let value = dialog.drawnText(of: index + 1) { text(value, in: bounds, enabled: item.isEnabled) }
+                    if let value = dialog.drawnText(of: index + 1) {
+                        if item.kind == .editText, dialog.keyboardFocus == index + 1,
+                           let textMeasurement, let selection = dialog.selectedText[index + 1] {
+                            let run = ResolvedText.Run(string: MacRoman.decode(value.bytes), font: ResolvedFont(size: 12), color: black)
+                            let geometry = textMeasurement.measure(ResolvedText(runs: [run]), in: ProposedViewSize(bounds.size))
+                            let start = MacRoman.decode(value.bytes.prefix(selection.lowerBound)).unicodeScalars.count
+                            let end = MacRoman.decode(value.bytes.prefix(selection.upperBound)).unicodeScalars.count
+                            if start == end, let caret = geometry.caretRect(for: start) {
+                                add(CGRect(x: bounds.minX + caret.minX, y: bounds.minY + caret.minY, width: 1, height: caret.height), .color(black))
+                            } else {
+                                let highlight = ResolvedColor(red: 0.7, green: 0.8, blue: 1)
+                                for line in geometry.lines {
+                                    let positions = line.boundaries.filter { $0.offset >= start && $0.offset <= end }
+                                    if let first = positions.first, let last = positions.last, last.x > first.x {
+                                        add(CGRect(x: bounds.minX + first.x, y: bounds.minY + line.frame.minY,
+                                                   width: last.x - first.x, height: line.frame.height), .color(highlight))
+                                    }
+                                }
+                            }
+                        }
+                        text(value, in: bounds, enabled: item.isEnabled)
+                    }
                 }
             }
         }
