@@ -69,8 +69,8 @@ public final class DialogEventRouter {
         }
     }
 
-    /// Route the mouse parameters posted by GraphiteSDLEvents. Key events
-    /// require a translated character parameter, not a physical key code.
+    /// Route Carbon mouse and translated keyboard parameters supplied by a host.
+    /// Key events require a translated character, not a physical key code.
     @discardableResult
     public func route(_ event: CarbonEvent) -> Bool {
         if event.type.eventClass == "mous", [1, 2, 5].contains(event.type.kind),
