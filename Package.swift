@@ -167,7 +167,7 @@ let package = Package(
         ),
         .target(
             name: "GraphiteDialogs",
-            dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteControls", "GraphiteResources"]
+            dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteControls", "GraphiteResources", "GraphiteEvents"]
         ),
         .target(name: "GraphiteEvents", dependencies: ["GraphiteBase"]),
         .target(name: "GraphiteSDLEvents", dependencies: ["GraphiteEvents", "GraphiteBase",
