@@ -116,10 +116,15 @@ public final class ToolboxScene: HostScene {
            frame.size.width <= CGFloat(Int16.max), frame.size.height <= CGFloat(Int16.max) {
             let extraWidth = drawsWindowFrame ? window.structureBounds.width - window.contentBounds.width : 0
             let extraHeight = drawsWindowFrame ? window.structureBounds.height - window.contentBounds.height : 0
-            let width = Int16(max(1, Int(frame.size.width) - extraWidth))
-            let height = Int16(max(1, Int(frame.size.height) - extraHeight))
+            let requestedWidth = max(1, Int(frame.size.width) - extraWidth)
+            let requestedHeight = max(1, Int(frame.size.height) - extraHeight)
             let bounds = window.uncollapsedContentBounds
-            if bounds.width != Int(width) || bounds.height != Int(height) {
+            // Window.size adds the dimensions to the existing Int16 origin.
+            // Ignore host sizes that cannot be represented in global coordinates.
+            if let width = Int16(exactly: requestedWidth), let height = Int16(exactly: requestedHeight),
+               Int16(exactly: Int(bounds.left) + requestedWidth) != nil,
+               Int16(exactly: Int(bounds.top) + requestedHeight) != nil,
+               bounds.width != requestedWidth || bounds.height != requestedHeight {
                 window.size(width: width, height: height)
                 dirty = true
             }
