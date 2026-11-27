@@ -169,7 +169,7 @@ let package = Package(
             name: "GraphiteDialogs",
             dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteControls", "GraphiteResources", "GraphiteEvents"]
         ),
-        .target(name: "GraphiteCacaoHost", dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteDialogs", "GraphiteCacaoRenderer", .product(name: "CacaoHost", package: "Cacao"), .product(name: "CacaoRender", package: "Cacao")]),
+        .target(name: "GraphiteCacaoHost", dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteDialogs", "GraphiteEvents", "GraphiteCacaoRenderer", .product(name: "CacaoHost", package: "Cacao"), .product(name: "CacaoRender", package: "Cacao")]),
         .target(name: "GraphiteCacaoRenderer", dependencies: ["GraphiteBase", "GraphiteQuickDraw", "GraphiteWindows", "GraphiteControls", "GraphiteDialogs", .product(name: "CacaoRender", package: "Cacao")]),
         .target(name: "GraphiteEvents", dependencies: ["GraphiteBase"]),
         .target(
