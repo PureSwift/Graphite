@@ -50,7 +50,8 @@ public final class DialogEventRouter {
         let types: Set<EventType> = [
             EventType(eventClass: "mous", kind: 1), EventType(eventClass: "mous", kind: 2),
             EventType(eventClass: "mous", kind: 5), EventType(eventClass: "keyb", kind: 1),
-            EventType(eventClass: "keyb", kind: 2), EventType(eventClass: "text", kind: 1)
+            EventType(eventClass: "keyb", kind: 2), EventType(eventClass: "text", kind: 1),
+            EventType(eventClass: "gdlg", kind: 1)
         ]
         return target.install(types: types) { [weak self] event, _ in
             self?.route(event) == true ? .handled : .notHandled
@@ -87,6 +88,12 @@ public final class DialogEventRouter {
     /// Key events require a translated character, not a physical key code.
     @discardableResult
     public func route(_ event: CarbonEvent) -> Bool {
+        if event.type == EventType(eventClass: "gdlg", kind: 1) {
+            guard let dialog = trackingDialog else { return false }
+            trackingDialog = nil
+            deliver(.mouseUp(Point(v: .min, h: .min)), to: dialog)
+            return true
+        }
         if event.type.eventClass == "mous", [1, 2, 5].contains(event.type.kind),
            let bytes = event.parameter("mloc", type: "hipt")?.bytes, bytes.count == 8 {
             func word(_ offset: Int) -> UInt32 {
