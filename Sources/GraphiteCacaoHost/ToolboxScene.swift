@@ -17,6 +17,8 @@ public final class ToolboxScene: HostScene {
     public var onDetach: () -> Void
     /// When set, translated input is posted here for the application to dispatch.
     public var eventQueue: EventQueue?
+    /// Called after an event is queued so a host can dispatch it promptly.
+    public var didPostEvent: (() -> Void)?
     private var dirty = true
     private var revision = 0
     private let renderer = ToolboxRenderer()
@@ -40,6 +42,7 @@ public final class ToolboxScene: HostScene {
     public func handle(_ event: HostEvent, time: Double) {
         if let eventQueue, let translated = HostEventTranslator().translate(event, window: window, time: time) {
             eventQueue.post(translated)
+            didPostEvent?()
             return
         }
         let translated: DialogEvent?
