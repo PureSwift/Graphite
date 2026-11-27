@@ -13,7 +13,10 @@ public enum ToolboxWindowHost {
         guard let host = HostRuntime.openWindow(title: MacRoman.decode(scene.dialog.title.bytes),
                                                  size: CGSize(width: bounds.width, height: bounds.height),
                                                  decorations: graphiteFrame ? .none : .system,
-                                                 makeScene: { _ in scene }) else { return nil }
+                                                 makeScene: { host in
+                                                     scene.textMeasurement = host.textMeasurement
+                                                     return scene
+                                                 }) else { return nil }
         scene.drawsWindowFrame = graphiteFrame
         dispatcher.attach(scene)
         let previousDetach = scene.onDetach
