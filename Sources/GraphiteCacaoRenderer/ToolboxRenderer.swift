@@ -42,7 +42,11 @@ public struct ToolboxRenderer {
             for (index, item) in dialog.itemList.items.enumerated() where !dialog.hiddenItems.contains(index + 1) {
                 if item.kind == .staticText || item.kind == .editText {
                     let bounds = frame(item.bounds)
-                    if item.kind == .editText { add(bounds, .color(white)) }
+                    if item.kind == .editText {
+                        add(bounds, .color(item.isEnabled ? black : gray))
+                        let inner = bounds.insetBy(dx: 1, dy: 1)
+                        if inner.width > 0 && inner.height > 0 { add(inner, .color(white)) }
+                    }
                     if let value = dialog.drawnText(of: index + 1) { text(value, in: bounds, enabled: item.isEnabled) }
                 }
             }
@@ -77,6 +81,11 @@ public struct ToolboxRenderer {
                 let thumbRect = vertical ? CGRect(x: bounds.minX, y: bounds.minY + offset, width: bounds.width, height: thumb) : CGRect(x: bounds.minX + offset, y: bounds.minY, width: thumb, height: bounds.height)
                 add(thumbRect.insetBy(dx: 1, dy: 1), .color(edge))
             default:
+                if let dialog, dialog.defaultItem > 0,
+                   dialog.control(of: dialog.defaultItem) === control, enabled {
+                    add(bounds.insetBy(dx: -3, dy: -3), .roundedRectangle(.init(color: black, cornerRadius: 7)))
+                    add(bounds.insetBy(dx: -1, dy: -1), .roundedRectangle(.init(color: white, cornerRadius: 5)))
+                }
                 add(bounds, .roundedRectangle(.init(color: edge, cornerRadius: 4)))
                 let inset = bounds.insetBy(dx: 1, dy: 1)
                 if inset.width > 0 && inset.height > 0 { add(inset, .roundedRectangle(.init(color: pressed ? gray : white, cornerRadius: 3))) }
