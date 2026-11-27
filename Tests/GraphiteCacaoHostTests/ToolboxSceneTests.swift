@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 import CacaoHost
+import CacaoRender
 import GraphiteBase
 import GraphiteDialogs
 import GraphiteControls
@@ -196,4 +197,30 @@ import GraphiteWindows
     dialog.focusTextItem(2)
     let second = ToolboxRenderer().render(window: window, dialog: dialog)
     #expect(first.items.map(\.frame) != second.items.map(\.frame))
+}
+
+@MainActor
+private struct TestTextMeasurement: TextMeasurementService {
+    func measure(_ text: ResolvedText, in proposal: ProposedViewSize) -> TextMeasurement {
+        let count = text.string.unicodeScalars.count
+        return TextMeasurement(lines: [.init(frame: CGRect(x: 0, y: 0, width: count * 5, height: 10), baseline: 8,
+                                             boundaries: (0...count).map { .init(offset: $0, x: CGFloat($0 * 5)) })])
+    }
+}
+
+@MainActor
+@Test func rendererUsesMeasuredCaretAndSelection() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 50, bottom: 150, right: 250), items: [
+        DialogItem(bounds: Rect(top: 10, left: 10, bottom: 30, right: 100), kind: .editText, text: "abc")
+    ])
+    try dialog.attach(to: manager)
+    let window = try #require(dialog.window)
+    let renderer = ToolboxRenderer(textMeasurement: TestTextMeasurement())
+    dialog.selectText(of: 1, range: 2..<2)
+    let caret = renderer.render(window: window, dialog: dialog)
+    #expect(caret.items.contains { $0.frame == CGRect(x: 20, y: 10, width: 1, height: 10) })
+    dialog.selectText(of: 1, range: 0..<2)
+    let selection = renderer.render(window: window, dialog: dialog)
+    #expect(selection.items.contains { $0.frame == CGRect(x: 10, y: 10, width: 10, height: 10) })
 }
