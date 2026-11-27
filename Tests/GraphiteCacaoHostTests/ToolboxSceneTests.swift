@@ -260,3 +260,18 @@ private struct TestTextMeasurement: TextMeasurementService {
     scene.handle(.text("X"), time: 4)
     #expect(dialog.text(of: 1)?.bytes == Array("aXd".utf8))
 }
+
+@MainActor
+@Test func scrollbarRenderingMatchesControlGeometry() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let window = try manager.newWindow(bounds: Rect(top: 50, left: 50, bottom: 200, right: 250))
+    let control = Control(kind: .scrollBar, bounds: Rect(top: 10, left: 10, bottom: 110, right: 26))
+    control.maximum = 100
+    control.value = 50
+    let thumb = try #require(control.definition.thumbRect(bounds: control.bounds, kind: .scrollBar, value: control.value, minimum: control.minimum, maximum: control.maximum))
+    let expected = CGRect(x: Int(thumb.left), y: Int(thumb.top), width: thumb.width, height: thumb.height)
+    let list = ToolboxRenderer().render(window: window, controls: [control])
+    #expect(list.items.contains { $0.frame == expected })
+    let hit = Point(v: thumb.top + 1, h: thumb.left + 1)
+    #expect(control.hitTest(hit) == .thumb)
+}
