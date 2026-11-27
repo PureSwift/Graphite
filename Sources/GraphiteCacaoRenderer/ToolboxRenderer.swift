@@ -50,9 +50,9 @@ public struct ToolboxRenderer {
         let black = ResolvedColor(red: 0, green: 0, blue: 0)
         let white = ResolvedColor(red: 1, green: 1, blue: 1)
         let gray = ResolvedColor(red: 0.8, green: 0.8, blue: 0.8)
-        func text(_ string: PascalString, in rect: CGRect, enabled: Bool = true) {
+        func text(_ string: PascalString, in rect: CGRect, enabled: Bool = true, alignment: TextAlignment = .leading) {
             let run = ResolvedText.Run(string: MacRoman.decode(string.bytes), font: ResolvedFont(size: 12), color: enabled ? black : gray)
-            add(rect, .text(ResolvedText(runs: [run])))
+            add(rect, .text(ResolvedText(runs: [run], alignment: alignment)))
         }
         let pixels = window.pixels
         var rgba: [UInt8] = []
@@ -122,7 +122,7 @@ public struct ToolboxRenderer {
                 add(bounds, .roundedRectangle(.init(color: edge, cornerRadius: 4)))
                 let inset = bounds.insetBy(dx: 1, dy: 1)
                 if inset.width > 0 && inset.height > 0 { add(inset, .roundedRectangle(.init(color: pressed ? gray : white, cornerRadius: 3))) }
-                text(control.title, in: inset, enabled: enabled)
+                text(control.title, in: inset, enabled: enabled, alignment: .center)
             }
         }
         return DisplayList(items: items)
