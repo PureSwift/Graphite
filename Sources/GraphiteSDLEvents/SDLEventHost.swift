@@ -52,6 +52,13 @@ public final class SDLEventHost: EventLoopHost {
             postMouse(kind: 2, window: window, x: x, y: y, button: button.rawValue, queue: queue)
         case .keyDown(let window, let scan, _, let modifiers, let repeated):
             if !postKey(window: window, scan: scan.rawValue, modifiers: modifiers, kind: repeated ? 2 : 1, queue: queue) { unhandled(event) }
+        case .textInput(let window, let text):
+            guard let bytes = MacRoman.encode(text), !bytes.isEmpty else { unhandled(event); return }
+            var translated = CarbonEvent(type: EventType(eventClass: "text", kind: 1), time: eventTime)
+            translated.setParameter("text", type: "TEXT", bytes: bytes)
+            var windowID = BigEndianWriter(); windowID.write(window)
+            translated.setParameter("swin", type: "magn", bytes: windowID.bytes)
+            queue.post(translated)
         case .keyUp(let window, let scan, _, let modifiers, _):
             if !postKey(window: window, scan: scan.rawValue, modifiers: modifiers, kind: 3, queue: queue) { unhandled(event) }
         default:
@@ -98,6 +105,8 @@ public final class SDLEventHost: EventLoopHost {
         var key = BigEndianWriter(); key.write(UInt32(code))
         var mods = BigEndianWriter(); mods.write(flags)
         event.setParameter("kcod", type: "magn", bytes: key.bytes)
+        let special: [UInt8: UInt8] = [36: 13, 53: 27, 51: 8, 48: 9, 123: 28, 124: 29, 125: 31, 126: 30]
+        if let character = special[code] { event.setParameter("kchr", type: "char", bytes: [character]) }
         event.setParameter("kmod", type: "magn", bytes: mods.bytes)
         var windowID = BigEndianWriter(); windowID.write(window)
         event.setParameter("swin", type: "magn", bytes: windowID.bytes)
