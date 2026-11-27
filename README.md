@@ -103,15 +103,6 @@ swift run GraphiteDialogDemo
 The demo exercises text entry, a checkbox, Apply, and Close. Return activates
 Apply and Escape activates Close.
 
-To try the dialog host on an interactive desktop, install SDL3 and run:
-
-```bash
-swift run GraphiteDialogDemo
-```
-
-The demo exercises text entry, a checkbox, Apply, and Close. Return activates
-Apply and Escape activates Close.
-
 ## License
 
 MIT. Code ported from [Pomme](https://github.com/jorio/Pomme) keeps its MIT
