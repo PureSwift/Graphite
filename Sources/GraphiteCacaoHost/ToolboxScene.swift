@@ -4,6 +4,7 @@ import CacaoRender
 import GraphiteBase
 import GraphiteWindows
 import GraphiteDialogs
+import GraphiteEvents
 import GraphiteCacaoRenderer
 
 /// A CacaoHost scene for a Graphite dialog. The caller attaches the dialog
@@ -14,6 +15,8 @@ public final class ToolboxScene: HostScene {
     public let window: Window
     public var onItemHit: (Int) -> Void
     public var onDetach: () -> Void
+    /// When set, translated input is posted here for the application to dispatch.
+    public var eventQueue: EventQueue?
     private var dirty = true
     private var revision = 0
     private let renderer = ToolboxRenderer()
@@ -35,6 +38,10 @@ public final class ToolboxScene: HostScene {
     public func invalidate() { dirty = true }
 
     public func handle(_ event: HostEvent, time: Double) {
+        if let eventQueue, let translated = HostEventTranslator().translate(event, window: window, time: time) {
+            eventQueue.post(translated)
+            return
+        }
         let translated: DialogEvent?
         switch event {
         case .pointer(let phase, button: .primary, at: let position, isFromTouch: _):
