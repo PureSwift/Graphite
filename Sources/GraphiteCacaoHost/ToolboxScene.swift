@@ -94,6 +94,17 @@ public final class ToolboxScene: HostScene {
     }
 
     public func update(_ frame: HostFrame) -> Bool {
+        if frame.size.width.isFinite, frame.size.height.isFinite,
+           frame.size.width >= 1, frame.size.height >= 1,
+           frame.size.width <= CGFloat(Int16.max), frame.size.height <= CGFloat(Int16.max) {
+            let width = Int16(frame.size.width.rounded(.towardZero))
+            let height = Int16(frame.size.height.rounded(.towardZero))
+            let bounds = window.uncollapsedContentBounds
+            if bounds.width != Int(width) || bounds.height != Int(height) {
+                window.size(width: width, height: height)
+                dirty = true
+            }
+        }
         let changed = dirty
         dirty = false
         if changed { revision &+= 1 }
