@@ -95,6 +95,7 @@ let package = Package(
             name: "GraphiteDialogs",
             targets: ["GraphiteDialogs"]
         ),
+        .library(name: "GraphiteCacaoHost", targets: ["GraphiteCacaoHost"]),
         .library(name: "GraphiteCacaoRenderer", targets: ["GraphiteCacaoRenderer"]),
         .library(name: "GraphiteEvents", targets: ["GraphiteEvents"])
     ],
@@ -168,6 +169,7 @@ let package = Package(
             name: "GraphiteDialogs",
             dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteControls", "GraphiteResources", "GraphiteEvents"]
         ),
+        .target(name: "GraphiteCacaoHost", dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteDialogs", "GraphiteCacaoRenderer", .product(name: "CacaoHost", package: "Cacao"), .product(name: "CacaoRender", package: "Cacao")]),
         .target(name: "GraphiteCacaoRenderer", dependencies: ["GraphiteBase", "GraphiteQuickDraw", "GraphiteWindows", "GraphiteControls", "GraphiteDialogs", .product(name: "CacaoRender", package: "Cacao")]),
         .target(name: "GraphiteEvents", dependencies: ["GraphiteBase"]),
         .target(
@@ -222,6 +224,7 @@ let package = Package(
             name: "GraphiteDialogsTests",
             dependencies: ["GraphiteDialogs"]
         ),
+        .testTarget(name: "GraphiteCacaoHostTests", dependencies: ["GraphiteCacaoHost", "GraphiteBase", "GraphiteDialogs", "GraphiteWindows", "GraphiteQuickDraw", .product(name: "CacaoHost", package: "Cacao")]),
         .testTarget(name: "GraphiteEventsTests", dependencies: ["GraphiteEvents"])
     ]
 )
