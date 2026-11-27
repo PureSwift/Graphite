@@ -22,7 +22,8 @@ public final class ToolboxScene: HostScene {
     public var didPostEvent: (() -> Void)?
     private var dirty = true
     private var revision = 0
-    private let renderer = ToolboxRenderer()
+    public var textMeasurement: (any TextMeasurementService)?
+    private var renderer: ToolboxRenderer { ToolboxRenderer(textMeasurement: textMeasurement) }
 
     public init?(dialog: Dialog, onItemHit: @escaping (Int) -> Void, onDetach: @escaping () -> Void = {}) {
         guard let window = dialog.window else { return nil }
