@@ -20,6 +20,7 @@ public final class ToolboxScene: HostScene {
     public var eventQueue: EventQueue?
     /// Called after an event is queued so a host can dispatch it promptly.
     public var didPostEvent: (() -> Void)?
+    private var selectionAnchor: (item: Int, offset: Int)?
     private var dirty = true
     private var revision = 0
     public var textMeasurement: (any TextMeasurementService)?
@@ -114,14 +115,23 @@ public final class ToolboxScene: HostScene {
     }
 
     private func positionCaret(for event: HostEvent) {
-        guard case .pointer(.began, button: .primary, at: let point, isFromTouch: _) = event,
-              point.x.isFinite, point.y.isFinite,
+        guard case .pointer(let phase, button: .primary, at: let point, isFromTouch: _) = event else { return }
+        if phase == .cancelled { selectionAnchor = nil; return }
+        guard point.x.isFinite, point.y.isFinite,
               point.x >= CGFloat(Int16.min), point.x <= CGFloat(Int16.max),
               point.y >= CGFloat(Int16.min), point.y <= CGFloat(Int16.max),
-              let measurement = textMeasurement,
-              let index = dialog.findItem(at: Point(v: Int16(point.y), h: Int16(point.x))),
-              let item = dialog.item(index + 1), item.kind == .editText, item.isEnabled,
-              dialog.keyboardFocus == index + 1 else { return }
+              let measurement = textMeasurement else { return }
+        let number: Int
+        if phase == .began {
+            selectionAnchor = nil
+            guard let index = dialog.findItem(at: Point(v: Int16(point.y), h: Int16(point.x))) else { return }
+            number = index + 1
+        } else {
+            guard let anchor = selectionAnchor else { return }
+            number = anchor.item
+        }
+        guard let item = dialog.item(number), item.kind == .editText, item.isEnabled,
+              dialog.keyboardFocus == number else { selectionAnchor = nil; return }
         let bounds = item.bounds
         let run = ResolvedText.Run(string: MacRoman.decode(item.text.bytes), font: ResolvedFont(size: 12),
                                    color: ResolvedColor(red: 0, green: 0, blue: 0))
@@ -130,7 +140,10 @@ public final class ToolboxScene: HostScene {
         guard let scalarOffset = geometry.offset(nearest: CGPoint(x: point.x - CGFloat(bounds.left), y: point.y - CGFloat(bounds.top))) else { return }
         let bytes = item.text.bytes
         let byteOffset = (0...bytes.count).first { MacRoman.decode(bytes.prefix($0)).unicodeScalars.count >= scalarOffset } ?? bytes.count
-        dialog.selectText(of: index + 1, range: byteOffset..<byteOffset)
+        if phase == .began { selectionAnchor = (number, byteOffset) }
+        let anchor = selectionAnchor?.offset ?? byteOffset
+        dialog.selectText(of: number, range: min(anchor, byteOffset)..<max(anchor, byteOffset))
+        if phase == .ended { selectionAnchor = nil }
         dirty = true
     }
 
