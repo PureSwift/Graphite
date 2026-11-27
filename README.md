@@ -101,7 +101,8 @@ swift run GraphiteDialogDemo
 ```
 
 The demo exercises text entry, a checkbox, Apply, and Close. Return activates
-Apply and Escape activates Close.
+Apply and Escape activates Close. To try the Graphite-drawn frame instead of
+system window decorations, run `swift run GraphiteDialogDemo --graphite-frame`.
 
 ## License
 
