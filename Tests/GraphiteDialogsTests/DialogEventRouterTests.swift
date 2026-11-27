@@ -64,4 +64,21 @@ import GraphiteWindows
         #expect(hits == [2])
     }
 
+    @Test func dispatchThroughEventTarget() throws {
+        let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+        let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 50, bottom: 150, right: 250),
+                            items: [DialogItem(bounds: Rect(top: 10, left: 10, bottom: 30, right: 100), kind: .editText)])
+        try dialog.attach(to: manager)
+        let router = DialogEventRouter(windows: manager, itemHit: { _, _ in })
+        router.register(dialog)
+        let target = EventTarget()
+        let registration = router.install(on: target)
+        var event = CarbonEvent(type: EventType(eventClass: "text", kind: 1), time: 0)
+        event.setParameter("text", type: "TEXT", bytes: [65])
+        #expect(target.send(&event) == .handled)
+        #expect(dialog.text(of: 1)?.bytes == [65])
+        target.remove(registration)
+        #expect(target.send(&event) == .notHandled)
+    }
+
 }
