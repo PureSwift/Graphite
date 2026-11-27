@@ -83,3 +83,15 @@ import GraphiteWindows
     #expect(hits == [2])
     #expect(dispatcher.queue.count == 0)
 }
+
+@MainActor
+@Test func hostFrameUpdatesWindowSize() throws {
+    let manager = WindowManager(quickDraw: QuickDraw(screens: [GraphicsDevice.screen(width: 640, height: 480)]))
+    let dialog = Dialog(kind: .modeless, bounds: Rect(top: 50, left: 70, bottom: 150, right: 270))
+    try dialog.attach(to: manager)
+    let scene = try #require(ToolboxScene(dialog: dialog, onItemHit: { _ in }))
+    #expect(scene.update(HostFrame(time: 0, size: CGSize(width: 220, height: 120), scale: 1)))
+    #expect(scene.window.contentBounds.width == 220)
+    #expect(scene.window.contentBounds.height == 120)
+    #expect(!scene.update(HostFrame(time: 1, size: CGSize(width: 220, height: 120), scale: 1)))
+}
