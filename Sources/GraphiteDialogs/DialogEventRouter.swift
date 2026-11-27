@@ -89,6 +89,20 @@ public final class DialogEventRouter {
             }
             return route(ClassicEvent(what: event.type.kind == 1 ? 1 : 2, location: point))
         }
+        if event.type.eventClass == "text", event.type.kind == 1,
+           let bytes = event.parameter("text", type: "TEXT")?.bytes, !bytes.isEmpty,
+           let dialog = dialog(for: windows.frontWindow) {
+            deliver(.key(characters: PascalString(bytes: Array(bytes.prefix(255))), modifiers: 0), to: dialog)
+            return true
+        }
+        if event.type.eventClass == "keyb", [1, 2].contains(event.type.kind),
+           let bytes = event.parameter("kchr", type: "char")?.bytes, !bytes.isEmpty,
+           let dialog = dialog(for: windows.frontWindow) {
+            let modifiers = event.parameter("kmod", type: "magn")?.bytes ?? []
+            let flags = modifiers.suffix(2).reduce(UInt16(0)) { ($0 << 8) | UInt16($1) }
+            deliver(.key(characters: PascalString(bytes: Array(bytes.prefix(255))), modifiers: Int16(bitPattern: flags)), to: dialog)
+            return true
+        }
         return false
     }
 }
