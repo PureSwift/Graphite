@@ -94,14 +94,15 @@ swift build
 swift test
 ```
 
-The optional `GraphiteSDLEvents` product supplies an SDL3 event-loop host.
-Install SDL3 (`brew install sdl3` or the SDL3 development package) and enable
-its trait with `swift build --traits SDL3`. Initialize SDL's event subsystem
-before constructing `SDLEventHost`, and supply a callback for SDL events the
-host does not translate. The SDL event pump must run on the main thread. The
-host's `globalPosition` callback maps window-local SDL mouse coordinates to
-global coordinates; provide it when windows are not at the origin. Translated
-events carry their SDL window ID in the `swin` parameter.
+To try the dialog host on an interactive desktop, install SDL3 and run:
+
+```bash
+swift run GraphiteDialogDemo
+```
+
+The demo exercises text entry, a checkbox, Apply, and Close. Return activates
+Apply and Escape activates Close. To try the Graphite-drawn frame instead of
+system window decorations, run `swift run GraphiteDialogDemo --graphite-frame`.
 
 ## License
 

@@ -43,6 +43,7 @@ let package = Package(
         .macOS(.v15)
     ],
     products: [
+        .executable(name: "GraphiteDialogDemo", targets: ["GraphiteDialogDemo"]),
         .library(
             name: "Graphite",
             targets: ["Graphite"]
@@ -95,21 +96,22 @@ let package = Package(
             name: "GraphiteDialogs",
             targets: ["GraphiteDialogs"]
         ),
-        .library(name: "GraphiteEvents", targets: ["GraphiteEvents"]),
-        .library(name: "GraphiteSDLEvents", targets: ["GraphiteSDLEvents"])
+        .library(name: "GraphiteCacaoHost", targets: ["GraphiteCacaoHost"]),
+        .library(name: "GraphiteCacaoRenderer", targets: ["GraphiteCacaoRenderer"]),
+        .library(name: "GraphiteEvents", targets: ["GraphiteEvents"])
     ],
     // FreeType reads outline fonts; builds without it keep the bitmap font.
     traits: [
         .trait(name: "FreeType", description: "Outline fonts through FreeType"),
-        .trait(name: "SDL3", description: "SDL3 event host"),
         .default(enabledTraits: ["FreeType"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/PureSwift/Cacao.git", revision: "8d8901bb73dfca2e59ce536c103f562544aaa6a2"),
         .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0"),
         .package(url: "https://github.com/PureSwift/swift-freetype.git", from: "0.1.1"),
-        .package(url: "https://github.com/PureSwift/SDL.git", exact: "3.3.0"),
     ],
     targets: [
+        .executableTarget(name: "GraphiteDialogDemo", dependencies: ["GraphiteBase", "GraphiteQuickDraw", "GraphiteWindows", "GraphiteDialogs", "GraphiteCacaoHost", .product(name: "CacaoHost", package: "Cacao")], path: "Examples/GraphiteDialogDemo"),
         .target(
             name: "GraphiteBase"
         ),
@@ -167,12 +169,11 @@ let package = Package(
         ),
         .target(
             name: "GraphiteDialogs",
-            dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteControls", "GraphiteResources"]
+            dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteControls", "GraphiteResources", "GraphiteEvents"]
         ),
+        .target(name: "GraphiteCacaoHost", dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteDialogs", "GraphiteEvents", "GraphiteCacaoRenderer", .product(name: "CacaoHost", package: "Cacao"), .product(name: "CacaoRender", package: "Cacao")]),
+        .target(name: "GraphiteCacaoRenderer", dependencies: ["GraphiteBase", "GraphiteQuickDraw", "GraphiteWindows", "GraphiteControls", "GraphiteDialogs", .product(name: "CacaoRender", package: "Cacao")]),
         .target(name: "GraphiteEvents", dependencies: ["GraphiteBase"]),
-        .target(name: "GraphiteSDLEvents", dependencies: ["GraphiteEvents", "GraphiteBase",
-            .product(name: "SDL3Swift", package: "SDL", condition: .when(traits: ["SDL3"]))],
-            swiftSettings: [.define("GRAPHITE_SDL3", .when(traits: ["SDL3"]))]),
         .target(
             name: "Graphite",
             dependencies: ["GraphiteBase", "GraphiteTasks", "GraphiteFiles", "GraphiteResources", "GraphiteAppleEvents", "GraphiteQuickDraw", "GraphiteText", "GraphiteSound", "GraphiteWindows", "GraphiteMenus", "GraphiteControls", "GraphiteDialogs", "GraphiteEvents"]
@@ -225,9 +226,7 @@ let package = Package(
             name: "GraphiteDialogsTests",
             dependencies: ["GraphiteDialogs"]
         ),
-        .testTarget(name: "GraphiteEventsTests", dependencies: ["GraphiteEvents"]),
-        .testTarget(name: "GraphiteSDLEventsTests", dependencies: ["GraphiteSDLEvents", "GraphiteEvents", "GraphiteBase",
-            .product(name: "SDL3Swift", package: "SDL", condition: .when(traits: ["SDL3"]))],
-            swiftSettings: [.define("GRAPHITE_SDL3", .when(traits: ["SDL3"]))])
+        .testTarget(name: "GraphiteCacaoHostTests", dependencies: ["GraphiteCacaoHost", "GraphiteBase", "GraphiteDialogs", "GraphiteWindows", "GraphiteQuickDraw", .product(name: "CacaoHost", package: "Cacao")]),
+        .testTarget(name: "GraphiteEventsTests", dependencies: ["GraphiteEvents"])
     ]
 )
