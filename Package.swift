@@ -95,6 +95,7 @@ let package = Package(
             name: "GraphiteDialogs",
             targets: ["GraphiteDialogs"]
         ),
+        .library(name: "GraphiteCacaoRenderer", targets: ["GraphiteCacaoRenderer"]),
         .library(name: "GraphiteEvents", targets: ["GraphiteEvents"]),
         .library(name: "GraphiteSDLEvents", targets: ["GraphiteSDLEvents"])
     ],
@@ -105,6 +106,7 @@ let package = Package(
         .default(enabledTraits: ["FreeType"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/PureSwift/Cacao.git", revision: "054f72f786a4c2529540b11bd896eb7a222c2227"),
         .package(url: "https://github.com/apple/swift-system.git", from: "1.9.0"),
         .package(url: "https://github.com/PureSwift/swift-freetype.git", from: "0.1.1"),
         .package(url: "https://github.com/PureSwift/SDL.git", exact: "3.3.0"),
@@ -169,6 +171,7 @@ let package = Package(
             name: "GraphiteDialogs",
             dependencies: ["GraphiteBase", "GraphiteWindows", "GraphiteControls", "GraphiteResources", "GraphiteEvents"]
         ),
+        .target(name: "GraphiteCacaoRenderer", dependencies: ["GraphiteBase", "GraphiteQuickDraw", "GraphiteWindows", "GraphiteControls", "GraphiteDialogs", .product(name: "CacaoRender", package: "Cacao")]),
         .target(name: "GraphiteEvents", dependencies: ["GraphiteBase"]),
         .target(name: "GraphiteSDLEvents", dependencies: ["GraphiteEvents", "GraphiteBase",
             .product(name: "SDL3Swift", package: "SDL", condition: .when(traits: ["SDL3"]))],
